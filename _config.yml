@@ -1,0 +1,51 @@
+# _config.yml
+
+# Основные настройки
+title: "Название вашего сайта"
+description: "Описание вашего сайта"
+baseurl: "" # оставьте пустым для пользовательского домена или репозитория
+url: "https://github.com/Mikrobic/ai_mephi/" # замените на ваш username
+
+# Настройки сборки
+markdown: kramdown
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Обработка файлов
+include:
+  - README.md # включаем README файл
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .git
+  - .gitignore
+
+# Настройки темы (если используете)
+theme: minima # стандартная тема GitHub Pages
+
+# Настройки по умолчанию
+defaults:
+  - scope:
+      path: "" # все файлы
+    values:
+      layout: default
+
+# Настройки сборки для GitHub Pages
+safe: true
+lsi: false
+highlighter: rouge
+
+# Кодировка
+encoding: utf-8
+
+# Временная зона
+timezone: Europe/Moscow # замените на вашу временную зону
+
+# SEO настройки
+google_analytics: # ваш ID Google Analytics (если нужен)
+twitter_username: # ваш Twitter (если нужен)
+github_username:  # ваш GitHub username (если нужен)
