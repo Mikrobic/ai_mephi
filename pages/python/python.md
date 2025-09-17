@@ -16,5 +16,5 @@ description: "Описание страницы Subpage"
 
 **<a href="https://disk.yandex.ru/d/bq9mGcMPbkfVqw">Занятие 5 (16.09.2025)</a>**
 
-**<a href="Пока Пусто">Занятие 6 (17.09.2025)</a>**
+**<a href="https://disk.yandex.ru/d/sRB6AqKz5Z_xMA">Занятие 6 (17.09.2025)</a>**
 
