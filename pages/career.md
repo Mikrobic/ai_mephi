@@ -56,7 +56,7 @@ title: Карьерный трек
   position: relative;
   width: 800px; /* Фиксированная ширина для десктопной версии */
   min-width: 800px;
-  padding-bottom: 120%; /* 16:9 соотношение */
+  padding-bottom: 100%; /* 16:9 соотношение */
   height: 0;
 }
 
