@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "SQL линтер"
-permalink: /project/linter/
+title: "Python"
+permalink: /project/python/notebook_1/
 description: "Описание страницы Subpage"
 ---
