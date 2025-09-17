@@ -1,6 +1,6 @@
 ---
 layout: page
-permalink: /career/
+permalink: /project/schedule/
 ---
 
 ## Календарь мероприятий
