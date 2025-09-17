@@ -16,8 +16,8 @@
     </div>
 
     <nav class="sidebar-nav">
-      <a class="sidebar-nav-item" href="{{ site.baseurl }}">✋Начальная страница</a>
-      <a class="sidebar-nav-item" href="{{ site.baseurl }}/career/">💼Карьерный трек</a>
+      <a class="sidebar-nav-item" href="{{ site.baseurl }}">✋Общая информация</a>
+      <a class="sidebar-nav-item" href="{{ site.baseurl }}/career/">💼Расписание</a>
       <a class="sidebar-nav-item" href="{{ site.baseurl }}/stack/">📱Стек</a>
 
 
@@ -32,28 +32,40 @@
     </span>
   </button>
 
-<div class="sidebar-submenu">
+  <div class="sidebar-submenu">
     <div class="sidebar-nav-group sidebar-nav-group_2">
-      <button class="sidebar-nav-item sidebar-nav-toggle_2" data-menu-id="project">
+      <button class="sidebar-nav-item sidebar-nav-toggle_2" data-menu-id="python_programming">
         <span class="toggle-content_2">
-          Python
+          Программирование на python
           <svg class="toggle-icon_2" viewBox="0 0 24 24">
             <path d="M7 10l5 5 5-5z"/>
           </svg>
         </span>
       </button>
       <div class="sidebar-submenu_2">
-        </a>
-        <a href="{{ site.baseurl }}/project/python/python/" class="sidebar-nav-item submenu-item">
-          Python
-        </a>
+        <!-- Третий уровень вложенности - Лекции -->
+        <div class="sidebar-nav-group sidebar-nav-group_3">
+          <button class="sidebar-nav-item sidebar-nav-toggle_3" data-menu-id="python_lectures">
+            <span class="toggle-content_3">
+              Лекции
+              <svg class="toggle-icon_3" viewBox="0 0 24 24">
+                <path d="M7 10l5 5 5-5z"/>
+              </svg>
+            </span>
+          </button>
+          <div class="sidebar-submenu_3">
+            <a href="{{ site.baseurl }}/project/python/python/" class="sidebar-nav-item submenu-item">
+              Python лекции
+            </a>
+          </div>
+        </div>
       </div>
     </div>
 
 <div class="sidebar-nav-group sidebar-nav-group_2">
       <button class="sidebar-nav-item sidebar-nav-toggle_2" data-menu-id="project">
         <span class="toggle-content_2">
-          SQL
+          Специальные разделы теории вероятности
           <svg class="toggle-icon_2" viewBox="0 0 24 24">
             <path d="M7 10l5 5 5-5z"/>
           </svg>

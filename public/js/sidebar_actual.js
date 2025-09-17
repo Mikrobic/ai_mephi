@@ -16,7 +16,7 @@ class SidebarMenu {
     }
 
     restoreMenuState() {
-        document.querySelectorAll('.sidebar-nav-toggle, .sidebar-nav-toggle_2').forEach(button => {
+        document.querySelectorAll('.sidebar-nav-toggle, .sidebar-nav-toggle_2, .sidebar-nav-toggle_3').forEach(button => {
             const group = button.closest('.sidebar-nav-group');
             const menuId = button.dataset.menuId;
             
@@ -32,7 +32,7 @@ class SidebarMenu {
             let parent = item.closest('.sidebar-nav-group');
             while (parent) {
                 parent.classList.add('active');
-                const toggleBtn = parent.querySelector('.sidebar-nav-toggle, .sidebar-nav-toggle_2');
+                const toggleBtn = parent.querySelector('.sidebar-nav-toggle, .sidebar-nav-toggle_2, .sidebar-nav-toggle_3');
                 if (toggleBtn && toggleBtn.dataset.menuId) {
                     localStorage.setItem(toggleBtn.dataset.menuId, 'open');
                 }
@@ -43,7 +43,7 @@ class SidebarMenu {
 
     initClicks() {
         this.menuGroups.forEach(group => {
-            const toggle = group.querySelector('.sidebar-nav-toggle, .sidebar-nav-toggle_2');
+            const toggle = group.querySelector('.sidebar-nav-toggle, .sidebar-nav-toggle_2, .sidebar-nav-toggle_3');
             if (toggle) {
                 toggle.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -76,7 +76,7 @@ class SidebarMenu {
         const children = parentGroup.querySelectorAll('.sidebar-nav-group');
         children.forEach(child => {
             child.classList.remove('active');
-            const childToggle = child.querySelector('.sidebar-nav-toggle, .sidebar-nav-toggle_2');
+            const childToggle = child.querySelector('.sidebar-nav-toggle, .sidebar-nav-toggle_2, .sidebar-nav-toggle_3');
             if (childToggle && childToggle.dataset.menuId) {
                 localStorage.setItem(childToggle.dataset.menuId, 'closed');
             }
@@ -95,7 +95,7 @@ class SidebarMenu {
         const group = document.querySelector(selector);
         if (group) {
             group.classList.add('active');
-            const toggle = group.querySelector('.sidebar-nav-toggle, .sidebar-nav-toggle_2');
+            const toggle = group.querySelector('.sidebar-nav-toggle, .sidebar-nav-toggle_2, .sidebar-nav-toggle_3');
             if (toggle) {
                 this.updateLocalStorage(toggle, 'open');
             }
@@ -106,7 +106,7 @@ class SidebarMenu {
         const group = document.querySelector(selector);
         if (group) {
             group.classList.remove('active');
-            const toggle = group.querySelector('.sidebar-nav-toggle, .sidebar-nav-toggle_2');
+            const toggle = group.querySelector('.sidebar-nav-toggle, .sidebar-nav-toggle_2, .sidebar-nav-toggle_3');
             if (toggle) {
                 this.updateLocalStorage(toggle, 'closed');
             }
