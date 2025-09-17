@@ -31,7 +31,7 @@ permalink: /career/
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: #6a9fb5 transparent;
   border-radius: 8px;
@@ -51,11 +51,12 @@ permalink: /career/
   border-radius: 4px;
 }
 
+/* Десктоп - МЕНЕЕ вертикальный */
 .calendar-container {
   position: relative;
-  width: 800px; /* Фиксированная ширина для десктопной версии */
-  min-width: 800px;
-  padding-bottom: 120%; /* 16:9 соотношение */
+  width: 1000px; /* Увеличил ширину для десктопа */
+  min-width: 1000px;
+  padding-bottom: 70%; /* МЕНЬШЕ вертикального пространства (16:9 ≈ 56%, 4:3 ≈ 75%) */
   height: 0;
 }
 
@@ -77,4 +78,48 @@ permalink: /career/
   display: none;
 }
 
+/* Планшет */
+@media (max-width: 1024px) {
+  .calendar-container {
+    width: 800px;
+    min-width: 800px;
+    padding-bottom: 90%; /* Немного более вертикальный */
+  }
+}
+
+/* Мобильная адаптация - БОЛЕЕ вертикальный */
+@media (max-width: 768px) {
+  .calendar-container {
+    width: 600px;
+    min-width: 600px;
+    padding-bottom: 130%; /* ЗНАЧИТЕЛЬНО более вертикальный */
+  }
+  
+  .scroll-hint {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-container {
+    width: 500px;
+    min-width: 500px;
+    padding-bottom: 160%; /* ОЧЕНЬ вертикальный */
+  }
+}
+
+@media (max-width: 320px) {
+  .calendar-container {
+    width: 450px;
+    min-width: 450px;
+    padding-bottom: 180%; /* МАКСИМАЛЬНО вертикальный */
+  }
+}
 </style>
+
+<script>
+// Показываем подсказку только на мобильных
+if (window.innerWidth <= 768) {
+  document.querySelector('.scroll-hint').style.display = 'block';
+}
+</script>
