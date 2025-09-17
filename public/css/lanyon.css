@@ -291,38 +291,49 @@ h1, h2, h3, h4, h5, h6 {
 
 /* 3 уровень вложенности */
 
+/* 3 уровень вложенности - исправлено для соответствия submenu-item */
 .sidebar-nav-group_3 {
-/*  margin-left: 15px; смещает группу вправо относительно родителя */ 
-  border-left: 2px solid rgba(255, 255, 255, 0.1);
-  padding-left: 10px;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  /* Убираем все отступы и границы предыдущего стиля */
+  margin-left: 0;
+  border-left: none;
+  padding-left: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  
+  /* Добавляем стили как у submenu-item */
+  position: relative;
+  display: block;
+  border-top: 1px solid rgba(255,255,255,.1);
 }
 
 .sidebar-nav-toggle_3 { 
   position: relative;
   background-color: transparent !important; 
- /* padding-left: 15px !important; смещает группу */ 
   cursor: pointer;
-  /* Убираем белый фон */
   width: 100%;
   text-align: left;
   border: none;
-  color: rgba(255,255,255,.8) !important; /* Цвет текста */
+  color: rgba(255,255,255,.8) !important;
+  
+  /* Стили как у submenu-item */
+  display: block;
+  padding: .5rem 1rem !important;
+  padding-left: 30px !important; /* Отступ как у submenu-item */
+  text-decoration: none;
+  transition: all 0.2s ease;
 }
-
 
 .sidebar-nav-group_3.active > .sidebar-nav-toggle_3 {
   color: #fff !important;
-  background-color: rgba(255,255,255,.15) !important;
+  background-color: rgba(255,255,255,.1) !important; /* Как при hover у submenu-item */
+  border-color: transparent;
 }
-
 
 .sidebar-submenu_3 {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease;
-  padding-left: 15px;
+  padding-left: 30px; /* Увеличиваем отступ для вложенности */
 }
 
 .sidebar-nav-group_3.active .sidebar-submenu_3 {
