@@ -54,9 +54,10 @@ title: Карьерный трек
 
 .calendar-container {
   position: relative;
-  width: 500px; /* Уже для мобильных */
-  min-width: 500px;
-  padding-bottom: 150%; /* Очень вертикальное соотношение 2:3 */
+  width: 800px; /* Фиксированная ширина для десктопной версии */
+  min-width: 800px;
+  padding-bottom: 120%; /* 16:9 соотношение */
+  height: 0;
 }
 
 .yandex-calendar {
