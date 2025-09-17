@@ -1,6 +1,6 @@
 ---
 layout: page
 title: "SQL линтер"
-permalink: /probability/probability/
+permalink: /project/probability/probability/
 description: "Описание страницы Subpage"
 ---
