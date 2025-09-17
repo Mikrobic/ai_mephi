@@ -5,6 +5,13 @@ permalink: /project/probability/probability/
 description: "Описание страницы Subpage"
 ---
 
+Занятие 1 
+
+<video width="100%" controls poster="/path/to/poster.jpg" style="border-radius: 8px; margin: 20px 0;">
+  <source src="https://disk.yandex.ru/i/DmSBEdRtx9B_Nw" type="video/mp4">
+</video>
+
+
 Занятие 3
 
 <video width="100%" controls poster="/path/to/poster.jpg" style="border-radius: 8px; margin: 20px 0;">
