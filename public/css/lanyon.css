@@ -265,7 +265,7 @@ h1, h2, h3, h4, h5, h6 {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease;
- /* padding-left: 15px;  убираем вложенность */
+ /* padding-left: 15px;  убираем отступ вложенности */
 }
 
 .sidebar-nav-group_2.active .sidebar-submenu_2 {
