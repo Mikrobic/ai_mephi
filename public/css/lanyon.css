@@ -302,7 +302,7 @@ h1, h2, h3, h4, h5, h6 {
 .sidebar-nav-toggle_3 { 
   position: relative;
   background-color: transparent !important; 
-  padding-right: 2rem;
+  padding-left: 15px !important;
   cursor: pointer;
   /* Убираем белый фон */
   width: 100%;
