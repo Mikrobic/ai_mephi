@@ -3,7 +3,7 @@ title: "Не Автор"
 tagline: "Тимакин Сергей"
 description: "Проекты Сергея Тимакина"
 url: "https://mikrobic.github.io"
-baseurl: "/site"
+baseurl: "/ai_mephi"
 paginate: 5
 permalink: /:baseurl/:path/
 
