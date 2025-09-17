@@ -358,7 +358,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .submenu-item {
   position: relative;
-  padding-left: 15px !important;
+  padding-left: 15px;
 }
 
 /*.submenu-item::before {  --иконка подменю
