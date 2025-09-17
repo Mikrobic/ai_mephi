@@ -1,6 +1,6 @@
 # Setup
-title: "Не Автор"
-tagline: "Тимакин Сергей"
+title: "Магистратура"
+tagline: "Науки о данных и искуственный интеллект"
 description: "Проекты Сергея Тимакина"
 url: "https://mikrobic.github.io"
 baseurl: "/ai_mephi"
@@ -21,6 +21,14 @@ defaults:
     values:
       layout: "page"
       sidebar: true
+  
+  - scope:
+      path: "pages/project"
+      type: "pages"
+    values:
+      layout: "page"
+      parent: "project"
+      permalink: /:baseurl/project/:title/
 
 # Gems
 plugins:
