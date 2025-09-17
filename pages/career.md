@@ -6,14 +6,6 @@ title: Карьерный трек
 
 ## Календарь мероприятий
 
----
-layout: page
-permalink: /career/
-title: Карьерный трек
----
-
-## Календарь мероприятий
-
 <div class="calendar-container">
   <iframe 
     src="https://calendar.yandex.ru/embed/week?layer_ids=34640123&layer_names=Онлайн-магистратура&tz_id=Europe%2FMoscow&uid=2246487652" 
