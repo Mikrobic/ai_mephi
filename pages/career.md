@@ -6,27 +6,58 @@ title: Карьерный трек
 
 ## Календарь мероприятий
 
-<div class="calendar-container">
-  <iframe 
-    src="https://calendar.yandex.ru/embed/week?layer_ids=34640123&layer_names=Онлайн-магистратура&tz_id=Europe%2FMoscow&uid=2246487652" 
-    class="yandex-calendar"
-    frameborder="0"
-    scrolling="no"
-    allowfullscreen
-    loading="lazy">
-  </iframe>
+<div class="calendar-wrapper">
+  <div class="calendar-scroll-container">
+    <div class="calendar-container">
+      <iframe 
+        src="https://calendar.yandex.ru/embed/week?layer_ids=34640123&layer_names=Онлайн-магистратура&tz_id=Europe%2FMoscow&uid=2246487652" 
+        class="yandex-calendar"
+        frameborder="0"
+        scrolling="no"
+        allowfullscreen
+        loading="lazy">
+      </iframe>
+    </div>
+  </div>
+  <div class="scroll-hint">← Листайте в стороны →</div>
 </div>
 
 <style>
-.calendar-container {
-  position: relative;
+.calendar-wrapper {
   width: 100%;
-  padding-bottom: 75%; /* Соотношение сторон 4:3 */
-  height: 0;
-  overflow: hidden;
+  margin: 2rem 0;
+}
+
+.calendar-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+  scrollbar-width: thin;
+  scrollbar-color: #6a9fb5 transparent;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin: 2rem 0;
+}
+
+.calendar-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.calendar-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.calendar-scroll-container::-webkit-scrollbar-thumb {
+  background: #6a9fb5;
+  border-radius: 4px;
+}
+
+.calendar-container {
+  position: relative;
+  width: 800px; /* Фиксированная ширина для десктопной версии */
+  min-width: 800px;
+  padding-bottom: 56.25%; /* 16:9 соотношение */
+  height: 0;
 }
 
 .yandex-calendar {
@@ -39,22 +70,32 @@ title: Карьерный трек
   background: white;
 }
 
-/* Адаптация для мобильных устройств */
+.scroll-hint {
+  text-align: center;
+  color: #6a9fb5;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  display: none;
+}
+
+/* Мобильная адаптация */
 @media (max-width: 768px) {
   .calendar-container {
-    padding-bottom: 100%; /* Квадратное соотношение для мобильных */
-    margin: 1rem 0;
-    border-radius: 12px;
+    width: 600px;
+    min-width: 600px;
+    padding-bottom: 70%;
   }
   
-  .yandex-calendar {
-    border-radius: 12px;
+  .scroll-hint {
+    display: block;
   }
 }
 
 @media (max-width: 480px) {
   .calendar-container {
-    padding-bottom: 120%; /* Более высокий контейнер для маленьких экранов */
+    width: 500px;
+    min-width: 500px;
+    padding-bottom: 80%;
   }
   
   h2 {
@@ -63,10 +104,32 @@ title: Карьерный трек
   }
 }
 
-/* Для очень маленьких экранов */
 @media (max-width: 320px) {
   .calendar-container {
-    padding-bottom: 140%;
+    width: 450px;
+    min-width: 450px;
+    padding-bottom: 90%;
   }
 }
+
+/* Индикатор скролла для мобильных */
+.calendar-scroll-container {
+  scroll-snap-type: x mandatory;
+}
+
+.calendar-container {
+  scroll-snap-align: start;
+}
 </style>
+
+<script>
+// Показываем подсказку только на мобильных
+if (window.innerWidth <= 768) {
+  document.querySelector('.scroll-hint').style.display = 'block';
+  
+  // Автоматически скрываем подсказку через 5 секунд
+  setTimeout(() => {
+    document.querySelector('.scroll-hint').style.opacity = '0.5';
+  }, 5000);
+}
+</script>
