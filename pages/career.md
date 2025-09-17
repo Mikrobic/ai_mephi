@@ -1,7 +1,6 @@
 ---
 layout: page
 permalink: /career/
-title: Карьерный трек
 ---
 
 ## Календарь мероприятий
