@@ -2,8 +2,6 @@
 layout: page
 permalink: /project/schedule/
 ---
-## Календарь мероприятий
-
 <div class="calendar-wrapper">
   <div class="calendar-scroll-container">
     <div class="calendar-container">
