@@ -1,9 +1,10 @@
 ---
 layout: page
-title: "Лекции и Семинары по Python"
 permalink: /project/python/python/
 description: "Описание страницы Subpage"
 ---
+**Лекции и Семинары по Python**
+
 
 **<a href="https://disk.yandex.ru/d/5tPfPHnO5Y7OBA">Занятие 1 (04.09.2025)</a>**
 

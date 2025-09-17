@@ -1,9 +1,9 @@
 ---
 layout: page
-title: "Лекции Теория Вероятностей"
 permalink: /project/probability/probability/
 description: "Описание страницы Subpage"
 ---
+**Лекции и Семинары Теория Вероятностей**
 
 **<a href="https://disk.yandex.ru/d/GztepiWiSsZDTQ">Занятие 1 (08.09.2025)</a>**
 
