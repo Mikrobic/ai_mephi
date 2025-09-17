@@ -16,6 +16,8 @@ description: "Описание страницы Subpage"
 Занятие 3
 
 
-<img src="https://disk.yandex.ru/d/HSzUHScWr8P6tg/GMT20250915-165624_Recording_1920x1080.mp4?t=120" 
-     alt="Кадр из видео лекции (2 минуты)" 
-     style="width: 100%; border-radius: 8px; margin: 20px 0;">
+<a href="https://disk.yandex.ru/d/HSzUHScWr8P6tg/GMT20250915-165624_Recording_1920x1080.mp4" target="_blank">
+  <img src="https://disk.yandex.ru/d/HSzUHScWr8P6tg/GMT20250915-165624_Recording_1920x1080.mp4?t=120" 
+       alt="Посмотреть видео лекции (кадр на 2 минуте)" 
+       style="width: 100%; border-radius: 8px; margin: 20px 0; cursor: pointer;">
+</a>
