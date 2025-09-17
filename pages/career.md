@@ -53,41 +53,90 @@ permalink: /career/
   }
 }
 
-/* Планшет */
+/* Планшет - адаптивная ширина */
 @media (max-width: 1024px) and (min-width: 769px) {
+  .calendar-wrapper {
+    max-width: 90%; /* Уменьшаем максимальную ширину для планшетов */
+    margin: 1.5rem auto;
+  }
+  
   .calendar-container {
     padding-bottom: 70%; /* Более вертикальный для планшетов */
   }
 }
 
-/* Мобильная адаптация - БОЛЕЕ вертикальный */
+/* Мобильная адаптация - полная ширина и вертикальность */
 @media (max-width: 768px) {
   .calendar-wrapper {
-    margin: 1.5rem auto;
+    max-width: 95%; /* Еще уже для мобильных */
+    margin: 1rem auto;
+    padding: 0 10px; /* Добавляем боковые отступы */
   }
   
   .calendar-container {
     padding-bottom: 100%; /* Квадратное соотношение */
     border-radius: 12px;
+    width: 100%; /* Полная ширина доступного пространства */
   }
 }
 
+/* Маленькие мобильные устройства */
 @media (max-width: 480px) {
+  .calendar-wrapper {
+    max-width: 100%; /* Полная ширина экрана */
+    padding: 0 8px;
+  }
+  
   .calendar-container {
-    padding-bottom: 130%; /* Вертикальный */
+    padding-bottom: 120%; /* Более вертикальный */
+    border-radius: 10px;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    text-align: center;
+    padding: 0 10px;
   }
 }
 
+/* Очень маленькие экраны */
 @media (max-width: 320px) {
+  .calendar-wrapper {
+    padding: 0 5px;
+  }
+  
   .calendar-container {
-    padding-bottom: 150%; /* Очень вертикальный */
+    padding-bottom: 140%; /* Максимально вертикальный */
+    border-radius: 8px;
   }
 }
 
-/* Скрываем скролл на десктопе */
-@media (min-width: 1025px) {
-  .calendar-scroll-container {
-    overflow-x: visible !important;
+/* Ландшафтная ориентация на мобильных */
+@media (max-width: 768px) and (orientation: landscape) {
+  .calendar-container {
+    padding-bottom: 70%; /* Менее вертикальный в альбомной ориентации */
+  }
+  
+  .calendar-wrapper {
+    max-width: 85%;
   }
 }
 </style>
+
+<script>
+// Дополнительная адаптация через JavaScript
+function adaptCalendar() {
+  const calendarWrapper = document.querySelector('.calendar-wrapper');
+  const calendarContainer = document.querySelector('.calendar-container');
+  
+  if (window.innerWidth <= 768) {
+    // Для мобильных делаем еще более адаптивным
+    const viewportWidth = window.innerWidth;
+    calendarWrapper.style.maxWidth = Math.min(viewportWidth - 20, 500) + 'px';
+  }
+}
+
+// Запускаем при загрузке и изменении размера
+window.addEventListener('load', adaptCalendar);
+window.addEventListener('resize', adaptCalendar);
+</script>
