@@ -265,7 +265,7 @@ h1, h2, h3, h4, h5, h6 {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease;
-  padding-left: 15px;
+ /* padding-left: 15px;  убираем вложенность */
 }
 
 .sidebar-nav-group_2.active .sidebar-submenu_2 {
@@ -333,7 +333,7 @@ h1, h2, h3, h4, h5, h6 {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease;
- /* padding-left: 30px;  Увеличиваем отступ для вложенности */
+  padding-left: 30px; /* Увеличиваем отступ для вложенности  в подпунктах меню*/
 }
 
 .sidebar-nav-group_3.active .sidebar-submenu_3 {
