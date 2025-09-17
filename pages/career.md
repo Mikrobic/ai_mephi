@@ -6,58 +6,34 @@ permalink: /career/
 ## Календарь мероприятий
 
 <div class="calendar-wrapper">
-  <div class="calendar-scroll-container">
-    <div class="calendar-container">
-      <iframe 
-        src="https://calendar.yandex.ru/embed/week?layer_ids=34640123&layer_names=Онлайн-магистратура&tz_id=Europe%2FMoscow&uid=2246487652" 
-        class="yandex-calendar"
-        frameborder="0"
-        scrolling="no"
-        allowfullscreen
-        loading="lazy">
-      </iframe>
-    </div>
+  <div class="calendar-container">
+    <iframe 
+      src="https://calendar.yandex.ru/embed/week?layer_ids=34640123&layer_names=Онлайн-магистратура&tz_id=Europe%2FMoscow&uid=2246487652" 
+      class="yandex-calendar"
+      frameborder="0"
+      scrolling="no"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
   </div>
-  <div class="scroll-hint">← Листайте в стороны →</div>
 </div>
 
 <style>
 .calendar-wrapper {
   width: 100%;
-  margin: 2rem 0;
+  max-width: 1200px; /* Максимальная ширина для десктопа */
+  margin: 2rem auto;
+  display: block;
 }
 
-.calendar-scroll-container {
-  width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: #6a9fb5 transparent;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.calendar-scroll-container::-webkit-scrollbar {
-  height: 8px;
-}
-
-.calendar-scroll-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.calendar-scroll-container::-webkit-scrollbar-thumb {
-  background: #6a9fb5;
-  border-radius: 4px;
-}
-
-/* Десктоп - МЕНЕЕ вертикальный */
 .calendar-container {
   position: relative;
-  width: 1000px; /* Увеличил ширину для десктопа */
-  min-width: 1000px;
-  padding-bottom: 70%; /* МЕНЬШЕ вертикального пространства (16:9 ≈ 56%, 4:3 ≈ 75%) */
+  width: 100%;
+  padding-bottom: 60%; /* Оптимальное соотношение для недельного календаря */
   height: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .yandex-calendar {
@@ -70,56 +46,48 @@ permalink: /career/
   background: white;
 }
 
-.scroll-hint {
-  text-align: center;
-  color: #6a9fb5;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
-  display: none;
+/* Десктоп - календарь полностью помещается */
+@media (min-width: 1025px) {
+  .calendar-container {
+    padding-bottom: 55%; /* Еще менее вертикальный для больших экранов */
+  }
 }
 
 /* Планшет */
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (min-width: 769px) {
   .calendar-container {
-    width: 800px;
-    min-width: 800px;
-    padding-bottom: 90%; /* Немного более вертикальный */
+    padding-bottom: 70%; /* Более вертикальный для планшетов */
   }
 }
 
 /* Мобильная адаптация - БОЛЕЕ вертикальный */
 @media (max-width: 768px) {
-  .calendar-container {
-    width: 600px;
-    min-width: 600px;
-    padding-bottom: 130%; /* ЗНАЧИТЕЛЬНО более вертикальный */
+  .calendar-wrapper {
+    margin: 1.5rem auto;
   }
   
-  .scroll-hint {
-    display: block;
+  .calendar-container {
+    padding-bottom: 100%; /* Квадратное соотношение */
+    border-radius: 12px;
   }
 }
 
 @media (max-width: 480px) {
   .calendar-container {
-    width: 500px;
-    min-width: 500px;
-    padding-bottom: 160%; /* ОЧЕНЬ вертикальный */
+    padding-bottom: 130%; /* Вертикальный */
   }
 }
 
 @media (max-width: 320px) {
   .calendar-container {
-    width: 450px;
-    min-width: 450px;
-    padding-bottom: 180%; /* МАКСИМАЛЬНО вертикальный */
+    padding-bottom: 150%; /* Очень вертикальный */
+  }
+}
+
+/* Скрываем скролл на десктопе */
+@media (min-width: 1025px) {
+  .calendar-scroll-container {
+    overflow-x: visible !important;
   }
 }
 </style>
-
-<script>
-// Показываем подсказку только на мобильных
-if (window.innerWidth <= 768) {
-  document.querySelector('.scroll-hint').style.display = 'block';
-}
-</script>
