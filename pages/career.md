@@ -18,13 +18,13 @@ permalink: /career/
       </iframe>
     </div>
   </div>
-  <div class="scroll-hint">← Листайте в стороны →</div>
+  <div class="scroll-hint">← Листайте в стороны для просмотра всей недели →</div>
 </div>
 
 <style>
 .calendar-wrapper {
   width: 100%;
-  max-width: 1400px; /* Максимальная ширина для десктопа */
+  max-width: 1400px;
   margin: 2rem auto;
   display: block;
 }
@@ -63,9 +63,9 @@ permalink: /career/
 /* Десктоп - адаптивная ширина */
 .calendar-container {
   position: relative;
-  width: 1200px; /* Ширина для комфортного отображения недели */
-  min-width: 100%; /* Автоматически подстраивается под контейнер */
-  padding-bottom: 65%; /* Менее вертикальный */
+  width: 1200px;
+  min-width: 100%;
+  padding-bottom: 65%;
   height: 0;
 }
 
@@ -85,12 +85,13 @@ permalink: /career/
   font-size: 0.9rem;
   margin-top: 0.5rem;
   display: none;
+  font-weight: 500;
 }
 
 /* Большие экраны - календарь полностью помещается */
 @media (min-width: 1400px) {
   .calendar-container {
-    width: 100%; /* Занимает всю ширину контейнера */
+    width: 100%;
     min-width: 100%;
     padding-bottom: 60%;
   }
@@ -118,32 +119,54 @@ permalink: /career/
   }
 }
 
-/* Мобильная адаптация - БОЛЕЕ вертикальный */
+/* Мобильная адаптация - УВЕЛИЧЕННАЯ ШИРИНА для полной недели */
 @media (max-width: 768px) {
   .calendar-container {
-    width: 600px;
-    min-width: 600px;
-    padding-bottom: 130%;
+    width: 800px; /* УВЕЛИЧЕНО с 600px для полной недели */
+    min-width: 800px;
+    padding-bottom: 110%; /* Менее вертикальный для горизонтального скролла */
   }
   
   .scroll-hint {
     display: block;
+    background: rgba(106, 159, 181, 0.1);
+    padding: 8px;
+    border-radius: 6px;
+    margin-top: 1rem;
   }
 }
 
 @media (max-width: 480px) {
   .calendar-container {
-    width: 500px;
-    min-width: 500px;
-    padding-bottom: 160%;
+    width: 700px; /* УВЕЛИЧЕНО с 500px */
+    min-width: 700px;
+    padding-bottom: 120%;
+  }
+  
+  .scroll-hint {
+    font-size: 0.8rem;
+    padding: 6px;
   }
 }
 
 @media (max-width: 320px) {
   .calendar-container {
-    width: 450px;
-    min-width: 450px;
-    padding-bottom: 180%;
+    width: 650px; /* УВЕЛИЧЕНО с 450px */
+    min-width: 650px;
+    padding-bottom: 130%;
+  }
+}
+
+/* Ландшафтная ориентация на мобильных */
+@media (max-width: 768px) and (orientation: landscape) {
+  .calendar-container {
+    width: 900px; /* Еще шире в альбомной ориентации */
+    min-width: 900px;
+    padding-bottom: 80%;
+  }
+  
+  .scroll-hint {
+    display: none; /* Скрываем подсказку в альбомном режиме */
   }
 }
 </style>
@@ -151,4 +174,20 @@ permalink: /career/
 <script>
 // Показываем подсказку только когда нужен скролл
 function checkScroll() {
-  const scroll
+  const scrollContainer = document.querySelector('.calendar-scroll-container');
+  const hint = document.querySelector('.scroll-hint');
+  
+  if (scrollContainer.scrollWidth > scrollContainer.clientWidth) {
+    hint.style.display = 'block';
+  } else {
+    hint.style.display = 'none';
+  }
+}
+
+// Проверяем при загрузке и изменении размера
+window.addEventListener('load', checkScroll);
+window.addEventListener('resize', checkScroll);
+
+// Также проверяем периодически (на случай асинхронной загрузки календаря)
+setInterval(checkScroll, 1000);
+</script>
