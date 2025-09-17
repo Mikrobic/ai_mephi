@@ -5,14 +5,27 @@ class SidebarMenu {
     }
 
     init() {
-        // Восстановление состояния из localStorage
+        // Сначала закрываем всё меню
+        this.closeAllMenus();
+        
+        // Затем восстанавливаем состояние из localStorage
         this.restoreMenuState();
         
-        // Автораскрытие активного меню
+        // Автораскрытие активного меню (после восстановления)
         this.autoExpandActiveMenus();
 
         // Инициализация кликов
         this.initClicks();
+    }
+
+    closeAllMenus() {
+        // Закрываем все группы меню
+        this.menuGroups.forEach(group => {
+            group.classList.remove('active');
+        });
+        
+        // Очищаем все сохраненные состояния (опционально)
+        // или оставляем localStorage для восстановления
     }
 
     restoreMenuState() {
@@ -67,9 +80,6 @@ class SidebarMenu {
             group.classList.add('active');
             this.updateLocalStorage(toggle, 'open');
         }
-        
-        // УБРАНО: закрытие других меню того же уровня
-        // Теперь кнопки не влияют друг на друга при нажатии
     }
 
     closeChildren(parentGroup) {
@@ -88,6 +98,17 @@ class SidebarMenu {
         if (menuId) {
             localStorage.setItem(menuId, state);
         }
+    }
+
+    // Метод для полного закрытия всех меню
+    closeAll() {
+        this.menuGroups.forEach(group => {
+            group.classList.remove('active');
+            const toggle = group.querySelector('.sidebar-nav-toggle, .sidebar-nav-toggle_2, .sidebar-nav-toggle_3');
+            if (toggle && toggle.dataset.menuId) {
+                localStorage.setItem(toggle.dataset.menuId, 'closed');
+            }
+        });
     }
 
     // Методы для программного управления
@@ -117,4 +138,9 @@ class SidebarMenu {
 // Инициализация
 document.addEventListener('DOMContentLoaded', () => {
     window.sidebarMenu = new SidebarMenu();
+    
+    // Дополнительно: закрыть всё меню при загрузке (на всякий случай)
+    setTimeout(() => {
+        window.sidebarMenu.closeAll();
+    }, 100);
 });
