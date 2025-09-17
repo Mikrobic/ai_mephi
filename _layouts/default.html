@@ -10,13 +10,14 @@
           <div class="masthead-content" style="position: relative; min-height: 65px;">  <!-- уменьшает верхнюю шапку -->
             <!-- Аватарка (справа) -->
             <a href="https://web.telegram.org/k/#@SergeyTimakin" class="avatar-container" 
-               style="position: absolute; right: 0; top: 50%; transform: translateY(-40%);">
+               style="position: absolute; right: 0; top: 50%; transform: translateY(-50%);">
                <img 
                src="{{ '/public/bird.jpg' | absolute_url }}" 
                class="avatar" 
                style="
                  width: clamp(60px, 15vw, 100px);
                  height: clamp(60px, 15vw, 100px);
+                 object-position: 70% 50%; /* ← Смещение вправо чтобы видеть голову */
                  border-radius: 50%;
                  object-fit: cover;
                  border: 2px solid #fff;
