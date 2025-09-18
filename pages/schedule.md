@@ -20,7 +20,7 @@ permalink: /project/schedule/
 
 
 <div class="gif-container">
-  <img src="{{ '/public/all_schedule' | absolute_url }}" alt="Расписание" style="width: 100%; max-width: 1000px; display: block; margin: 0 auto 20px;">
+  <img src="{{ '/public/all_schedule.jpg' | absolute_url }}" alt="Расписание" style="width: 100%; max-width: 1000px; display: block; margin: 0 auto 20px;">
 </div>
 
 <style>
