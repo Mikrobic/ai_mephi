@@ -9,4 +9,6 @@ permalink: /project/book/
 
 📈 <strong><a href="{{ site.baseurl }}/public/books/trofimov_matstat.pdf">Трофимов основы математической статистики</a></strong>
 
+🎯 <strong><a href="{{ site.baseurl }}/public/books/yandex_ab.pdf">Яндекс конспект по A/B тестированию</a></strong>
+
 </div>
