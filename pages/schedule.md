@@ -140,7 +140,7 @@ permalink: /project/schedule/
 
 @media (max-width: 480px) {
   .calendar-container {
-    width: 700px; /* УВЕЛИЧЕНО с 500px */
+    width: 1200px; /* УВЕЛИЧЕНО с 500px */
     min-width: 700px;
     padding-bottom: 120%;
   }
