@@ -18,6 +18,11 @@ permalink: /project/schedule/
   <div class="scroll-hint">← Листайте в стороны для просмотра всей недели →</div>
 </div>
 
+
+<div class="gif-container">
+  <img src="{{ '/public/all_schedule' | absolute_url }}" alt="Расписание" style="width: 100%; max-width: 1000px; display: block; margin: 0 auto 20px;">
+</div>
+
 <style>
 .calendar-wrapper {
   width: 100%;
