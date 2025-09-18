@@ -122,7 +122,7 @@ permalink: /project/schedule/
 }
 
 /* Мобильная адаптация - УВЕЛИЧЕННАЯ ШИРИНА для полной недели */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .calendar-container {
     width: 1200px; /* УВЕЛИЧЕНО с 600px для полной недели */
     min-width: 800px;
@@ -138,7 +138,7 @@ permalink: /project/schedule/
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 1200x) {
   .calendar-container {
     width: 1200px; /* УВЕЛИЧЕНО с 500px */
     min-width: 700px;
