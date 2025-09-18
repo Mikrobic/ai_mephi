@@ -4,16 +4,18 @@ permalink: /project/python/python/
 description: "Описание страницы Subpage"
 ---
 
-① 📊**<a href="https://disk.yandex.ru/d/5tPfPHnO5Y7OBA">Занятие (04.09.2025)</a>**
+<div style="text-align: center;">
 
-② 📈**<a href="https://disk.yandex.ru/d/jOGOC36Z7qXC2g">Занятие (06.09.2025)</a>**
+① 📊 <strong><a href="https://disk.yandex.ru/d/5tPfPHnO5Y7OBA">Занятие (04.09.2025)</a></strong><br><br>
 
-③ 🎯**<a href="https://disk.yandex.ru/d/QamXavMvDDw6uw">Занятие (09.09.2025)</a>**
+② 📈 <strong><a href="https://disk.yandex.ru/d/jOGOC36Z7qXC2g">Занятие (06.09.2025)</a></strong><br><br>
 
-④ 🔢**<a href="https://disk.yandex.ru/d/UgY3VgRyJINFtg">Занятие (11.09.2025)</a>**
+③ 🎯 <strong><a href="https://disk.yandex.ru/d/QamXavMvDDw6uw">Занятие (09.09.2025)</a></strong><br><br>
 
-⑤ 📐**<a href="https://disk.yandex.ru/d/bq9mGcMPbkfVqw">Занятие (16.09.2025)</a>**
+④ 🔢 <strong><a href="https://disk.yandex.ru/d/UgY3VgRyJINFtg">Занятие (11.09.2025)</a></strong><br><br>
 
-⑥ 🧮**<a href="https://disk.yandex.ru/d/sRB6AqKz5Z_xMA">Занятие (17.09.2025)</a>**
+⑤ 📐 <strong><a href="https://disk.yandex.ru/d/bq9mGcMPbkfVqw">Занятие (16.09.2025)</a></strong><br><br>
 
+⑥ 🧮 <strong><a href="https://disk.yandex.ru/d/sRB6AqKz5Z_xMA">Занятие (17.09.2025)</a></strong>
 
+</div>
