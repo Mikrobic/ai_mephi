@@ -124,7 +124,7 @@ permalink: /project/schedule/
 /* Мобильная адаптация - УВЕЛИЧЕННАЯ ШИРИНА для полной недели */
 @media (max-width: 768px) {
   .calendar-container {
-    width: 800px; /* УВЕЛИЧЕНО с 600px для полной недели */
+    width: 1200px; /* УВЕЛИЧЕНО с 600px для полной недели */
     min-width: 800px;
     padding-bottom: 110%; /* Менее вертикальный для горизонтального скролла */
   }
