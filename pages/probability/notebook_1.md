@@ -9,7 +9,7 @@ description: "Описание страницы Subpage"
 
 <div class="gif-container">
   <!-- Вместо картинки используем iframe для встраивания HTML -->
-  <iframe src="{{'/public/НаивныйБайес.html' | absolute_url }}" 
+  <iframe src="{{'/public/notebook_html/НаивныйБайес.html' | absolute_url }}" 
           alt="Notebook про броадкастинг" 
           style="width: 100%; height: 800px; display: block; margin: 0 auto 20px; border: 1px solid #ddd;">
   </iframe>
