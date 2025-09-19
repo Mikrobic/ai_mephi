@@ -4,9 +4,10 @@ permalink: /lectures/
 description: "Описание страницы Subpage"
 ---
 
-**Специальные разделы теории вероятностей**
 
 <div style="text-align: center;">
+
+Специальные разделы теории вероятностей
 
 ① 📊 <strong><a href="https://disk.yandex.ru/d/GztepiWiSsZDTQ">Занятие (08.09.2025)</a></strong><br><br>
 
@@ -16,9 +17,10 @@ description: "Описание страницы Subpage"
 
 </div>
 
-**Программирование на python**
-
 <div style="text-align: center;">
+
+Программирование на python
+
 
 ① 📊 <strong><a href="https://disk.yandex.ru/d/5tPfPHnO5Y7OBA">Занятие (04.09.2025)</a></strong><br><br>
 
