@@ -1,6 +1,6 @@
 ---
 layout: page
-permalink: /project/schedule/
+permalink: /schedule/
 ---
 <div class="calendar-wrapper">
   <div class="calendar-scroll-container">

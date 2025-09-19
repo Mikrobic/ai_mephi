@@ -1,6 +1,6 @@
 ---
 layout: page
-permalink: /project/book/
+permalink: /book/
 ---
 
 <div style="text-align: center;">

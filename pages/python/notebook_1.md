@@ -1,6 +1,6 @@
 ---
 layout: page
-permalink: /project/python/notebook_1/
+permalink: /python/notebook_1/
 description: "Описание страницы Subpage"
 ---
 

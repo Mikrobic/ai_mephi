@@ -1,6 +1,6 @@
 ---
 layout: page
-permalink: /project/probability/probability/
+permalink: /probability/probability/
 description: "Описание страницы Subpage"
 ---
 

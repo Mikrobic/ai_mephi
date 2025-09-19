@@ -1,6 +1,6 @@
 ---
 layout: page
-permalink: /project/python/python/
+permalink: /python/python/
 description: "Описание страницы Subpage"
 ---
 
