@@ -1,6 +1,6 @@
 ---
 layout: page
-permalink: /project/probability/notebook_1/
+permalink: /probability/notebook_1/
 description: "Описание страницы Subpage"
 ---
 **<a href="https://colab.research.google.com/drive/1olbYSH-O7PmM7dEDY1oEoxgwvU3PlpYp">Ссылка на Colab</a>**

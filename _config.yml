@@ -21,14 +21,6 @@ defaults:
     values:
       layout: "page"
       sidebar: true
-  
-  - scope:
-      path: "pages/project"
-      type: "pages"
-    values:
-      layout: "page"
-      parent: "project"
-      permalink: /:baseurl/project/:title/
 
 # Gems
 plugins:
