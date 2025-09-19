@@ -315,7 +315,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .lm-close-icon:after {
   content: 'X';
   display: block;
-  width: 15px;/*  */
+  width: 15px;
   height: 15px;
   text-align: center;
   color: #000;
@@ -323,57 +323,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   font-size: 12px;
   cursor: pointer;
 }
-
-        /* САМОЕ ВАЖНОЕ ПРАВИЛО: заставляет все элементы умещаться в ширину */
-        * {
-            max-width: 100% !important;
-            box-sizing: border-box;
-        }
-
-        /* Исправляем поведение для pre и code - самых частых виновников проблемы */
-        pre, code {
-            overflow-x: auto !important; /* Добавляем скролл только если не влазит */
-            white-space: pre-wrap !important; /* Позволяет длинным строкам переноситься */
-            word-wrap: break-word !important;
-        }
-
-        /* Специфичные стили для элементов Jupyter */
-        .jp-Notebook {
-            width: 100% !important;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .jp-Cell {
-            width: 100% !important;
-            overflow-wrap: break-word !important;
-        }
-        
-        .jp-Cell-input, .jp-Cell-output {
-            width: 100% !important;
-        }
-        
-        .jp-OutputArea-output {
-            overflow: auto !important;
-        }
-        
-        /* Для таблиц и DataFrame */
-        .dataframe {
-            display: block !important;
-            overflow-x: auto !important;
-            width: 100% !important;
-        }
-        
-        /* Убираем возможные минимальные ширины */
-        .jp-mod-noOutputs .jp-Cell-outputArea {
-            min-width: 0 !important;
-        }
-        
-        body {
-            margin: 10px;
-            padding: 0;
-            overflow-x: hidden; /* Скрываем горизонтальный скролл у body */
-        }
 
 /*
  * Copyright (c) Jupyter Development Team.
