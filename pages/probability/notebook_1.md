@@ -3,7 +3,7 @@ layout: page
 permalink: /probability/notebook_1/
 description: "Описание страницы Subpage"
 ---
-**<a href="https://colab.research.google.com/drive/1olbYSH-O7PmM7dEDY1oEoxgwvU3PlpYp">Ссылка на Colab</a>**
+**<a href="https://colab.research.google.com/drive/1iqS92DErz6u2xhVP_n5iOAHECZM-n86V?usp=sharing#scrollTo=3mUNKa3jSBPp">Ссылка на Colab</a>**
 
 **<a href="https://github.com/Mikrobic/ai_mephi/blob/main/pages/probability/jupyter/НаивныйБайес.ipynb">Ссылка на ipynb</a>**
 
