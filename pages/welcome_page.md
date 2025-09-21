@@ -11,7 +11,7 @@ permalink: /
 
 Корпоративный портал МИФИ: <a href="https://home.mephi.ru/">Портал</a>
 
-Цифровая кафедра: <a href="https://ismc.mephi.ru/digital_department">Портал</a>
+Цифровая кафедра: <a href="https://ismc.mephi.ru/digital_department">Кафедра</a>
 
 Группа в пачке: <a href="https://app.pachca.com/chats/28575726">Пачка</a>
 
