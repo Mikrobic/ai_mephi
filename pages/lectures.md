@@ -17,7 +17,7 @@ description: "Описание страницы Subpage"
 
 ④ 🔢 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%204">Занятие (19.09.2025) Ⓛ </a></strong><br><br>
 
-⑤ 📐 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%205">Занятие (22.09.2025) Ⓛ </a></strong><br><br>
+⑤ 📐 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%205">Занятие (22.09.2025) Ⓢ </a></strong><br><br>
 
 </div>
 
@@ -37,5 +37,7 @@ description: "Описание страницы Subpage"
 ⑤ 📐 <strong><a href="https://disk.yandex.ru/d/bq9mGcMPbkfVqw">Занятие (16.09.2025) Ⓛ </a></strong><br><br>
 
 ⑥ 🧮 <strong><a href="https://disk.yandex.ru/d/sRB6AqKz5Z_xMA">Занятие (17.09.2025) Ⓛ </a></strong><br><br>
+
+⑨ 📈 <strong><a href="https://disk.yandex.ru/d/_8nhbSLPvxAeRw">Занятие (23.09.2025) Ⓛ </a></strong><br><br>
 
 </div>
