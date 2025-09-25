@@ -11,7 +11,7 @@ description: "Описание страницы Subpage"
 
 ① 📊 <strong><a href="https://disk.yandex.ru/d/GztepiWiSsZDTQ">Занятие (08.09.2025) Ⓛ </a></strong><br>
 
-<strong><small>«Множества, логика, элементы статистики и комбинаторики»</small><strong>
+<strong><small>«Множества, логика, элементы статистики и комбинаторики»</small><strong><br><br>
 
 ② 📈 <strong><a href="https://disk.yandex.ru/d/VoGwTcjon12dWg">Занятие (12.09.2025) Ⓢ </a></strong><br><br>
 
