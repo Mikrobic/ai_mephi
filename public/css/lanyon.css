@@ -742,9 +742,9 @@ a.pagination-item:hover {
   font-size: 0.9em;
 }
 
-
+/* Текст в Лекциях */
 .lesson-title {
-  color: #8f5536;
+  color: #d28445;
   font-size: 0.9em;
   font-weight: bold;
   margin-top: 2px;
