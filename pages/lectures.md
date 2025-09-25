@@ -9,7 +9,7 @@ description: "Описание страницы Subpage"
 
 <strong>Специальные разделы теории вероятностей</strong><br><br>
 
-① 📊 <strong><a href="https://disk.yandex.ru/d/GztepiWiSsZDTQ">Занятие (08.09.2025) Ⓛ </a></strong>
+① 📊 <strong><a href="https://disk.yandex.ru/d/GztepiWiSsZDTQ">Занятие (08.09.2025) Ⓛ </a></strong><br><br>
 
 <small>«Множества, логика, элементы статистики и комбинаторики»</small>
 
