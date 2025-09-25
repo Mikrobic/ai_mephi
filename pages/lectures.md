@@ -33,27 +33,27 @@ description: "Описание страницы Subpage"
 <strong>Программирование на python</strong><br><br>
 
 <span class="lesson-title">«Система контроля версий Git»</span><br>
-① 📊 <strong><a href="https://disk.yandex.ru/d/5tPfPHnO5Y7OBA">Занятие (04.09.2025) Ⓛ </a></strong><br><br>
+① 📊 <strong><a href="https://disk.yandex.ru/d/5tPfPHnO5Y7OBA">Лекция (04.09.2025) Ⓛ </a></strong><br><br>
 
 <span class="lesson-title">«Введение в Python»</span><br>
-② 📈 <strong><a href="https://disk.yandex.ru/d/jOGOC36Z7qXC2g">Занятие (06.09.2025) Ⓛ </a></strong><br><br>
+② 📈 <strong><a href="https://disk.yandex.ru/d/jOGOC36Z7qXC2g">Лекция (06.09.2025) Ⓛ </a></strong><br><br>
 
 <span class="lesson-title">«Управляющие конструкции: условные операторы»</span><br>
-③ 🎯 <strong><a href="https://disk.yandex.ru/d/QamXavMvDDw6uw">Занятие (09.09.2025) Ⓛ </a></strong><br><br>
+③ 🎯 <strong><a href="https://disk.yandex.ru/d/QamXavMvDDw6uw">Лекция (09.09.2025) Ⓛ </a></strong><br><br>
 
 <span class="lesson-title">«Управляющие конструкции: циклы и ветвления»</span><br>
-④ 🔢 <strong><a href="https://disk.yandex.ru/d/UgY3VgRyJINFtg">Занятие (11.09.2025) Ⓛ </a></strong><br><br>
+④ 🔢 <strong><a href="https://disk.yandex.ru/d/UgY3VgRyJINFtg">Лекция (11.09.2025) Ⓛ </a></strong><br><br>
 
 <span class="lesson-title">«Типы данных:строки, списки и кортежи»</span><br>
-⑤ 📐 <strong><a href="https://disk.yandex.ru/d/bq9mGcMPbkfVqw">Занятие (16.09.2025) Ⓛ </a></strong><br><br>
+⑤ 📐 <strong><a href="https://disk.yandex.ru/d/bq9mGcMPbkfVqw">Лекция (16.09.2025) Ⓛ </a></strong><br><br>
 
 <span class="lesson-title">«Коллекции данных: словари и множества»</span><br>
-⑥ 🧮 <strong><a href="https://disk.yandex.ru/d/sRB6AqKz5Z_xMA">Занятие (17.09.2025) Ⓛ </a></strong><br><br>
+⑥ 🧮 <strong><a href="https://disk.yandex.ru/d/sRB6AqKz5Z_xMA">Лекция (17.09.2025) Ⓛ </a></strong><br><br>
 
 <span class="lesson-title">«Функции как полноправные объекты»</span><br>
-⑨ 📈 <strong><a href="https://disk.yandex.ru/d/_8nhbSLPvxAeRw">Занятие (23.09.2025) Ⓛ </a></strong><br><br>
+⑨ 📈 <strong><a href="https://disk.yandex.ru/d/_8nhbSLPvxAeRw">Лекция (23.09.2025) Ⓛ </a></strong><br><br>
 
 <span class="lesson-title">«Функции как полноправные объекты»</span><br>
-①⓪ 🧮 <strong><a href="https://disk.yandex.ru/d/B5kQ9LLERZ028Q">Занятие (24.09.2025) Ⓛ </a></strong><br><br>
+①⓪ 🧮 <strong><a href="https://disk.yandex.ru/d/B5kQ9LLERZ028Q">Лекция (24.09.2025) Ⓛ </a></strong><br><br>
 
 </div>
