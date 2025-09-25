@@ -12,19 +12,19 @@ description: "Описание страницы Subpage"
 
 <span class="lesson-title">«Множества, логика, элементы статистики и комбинаторики»</span><br>
 
-① 📊 <strong><a href="https://disk.yandex.ru/d/GztepiWiSsZDTQ">Занятие (08.09.2025) Ⓛ </a></strong><br>
+① 📊 <strong><a href="https://disk.yandex.ru/d/GztepiWiSsZDTQ">Лекция Ⓛ (08.09.2025)  </a></strong><br>
 
-② 📈 <strong><a href="https://disk.yandex.ru/d/VoGwTcjon12dWg">Занятие (12.09.2025) Ⓢ </a></strong><br><br>
+② 📈 <strong><a href="https://disk.yandex.ru/d/VoGwTcjon12dWg">Семинар Ⓢ (12.09.2025)   </a></strong><br><br>
 
 <span class="lesson-title">«Основы теории вероятностей»</span><br>
 
-③ 🎯 <strong><a href="https://disk.yandex.ru/d/HSzUHScWr8P6tg">Занятие (15.09.2025) Ⓛ </a></strong><br>
+③ 🎯 <strong><a href="https://disk.yandex.ru/d/HSzUHScWr8P6tg">Лекция Ⓛ (15.09.2025)  </a></strong><br>
 
-④ 🔢 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%204">Занятие (19.09.2025) Ⓢ </a></strong><br><br>
+④ 🔢 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%204">Семинар Ⓢ (19.09.2025)  </a></strong><br><br>
 
 <span class="lesson-title">«Графы»</span><br>
 
-⑤ 📐 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%205">Занятие (22.09.2025) Ⓢ </a></strong><br><br>
+⑤ 📐 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%205">Лекция Ⓛ (22.09.2025)  </a></strong><br><br>
 
 
 <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br><br>
