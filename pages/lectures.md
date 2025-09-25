@@ -10,6 +10,7 @@ description: "Описание страницы Subpage"
 <strong>Специальные разделы теории вероятностей</strong><br><br>
 
 ① 📊 <strong><a href="https://disk.yandex.ru/d/GztepiWiSsZDTQ">Занятие (08.09.2025) Ⓛ </a></strong><br><br>
+<span style="font-size: 0.9em; margin-top: 2px; display: block;"> «Множества, логика, элементы статистики и комбинаторики» </span><br><br>
 
 ② 📈 <strong><a href="https://disk.yandex.ru/d/VoGwTcjon12dWg">Занятие (12.09.2025) Ⓢ </a></strong><br><br>
 
@@ -40,6 +41,6 @@ description: "Описание страницы Subpage"
 
 ⑨ 📈 <strong><a href="https://disk.yandex.ru/d/_8nhbSLPvxAeRw">Занятие (23.09.2025) Ⓛ </a></strong><br><br>
 
-①⓪ 🧮 <strong><a href="https://disk.yandex.ru/d/B5kQ9LLERZ028Q">Занятие (24.09.2025) Ⓛ </a></strong><br><br>
+① 🧮 <strong><a href="https://disk.yandex.ru/d/B5kQ9LLERZ028Q">Занятие (24.09.2025) Ⓛ </a></strong><br><br>
 
 </div>
