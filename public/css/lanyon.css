@@ -741,3 +741,11 @@ a.pagination-item:hover {
   color: #666;
   font-size: 0.9em;
 }
+
+
+.lesson-title {
+  color: #8f5536;
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-top: 2px;
+}
