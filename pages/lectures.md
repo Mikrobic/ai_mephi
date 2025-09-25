@@ -20,7 +20,7 @@ description: "Описание страницы Subpage"
 
 ③ 🎯 <strong><a href="https://disk.yandex.ru/d/HSzUHScWr8P6tg">Занятие (15.09.2025) Ⓛ </a></strong><br>
 
-④ 🔢 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%204">Занятие (19.09.2025) Ⓛ </a></strong><br><br>
+④ 🔢 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%204">Занятие (19.09.2025) Ⓢ </a></strong><br><br>
 
 <span class="lesson-title">«Графы»</span><br>
 
