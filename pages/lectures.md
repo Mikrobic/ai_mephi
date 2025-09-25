@@ -27,7 +27,7 @@ description: "Описание страницы Subpage"
 ⑤ 📐 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%205">Занятие (22.09.2025) Ⓢ </a></strong><br><br>
 
 
-<hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;">
+<hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br><br>
 
 
 <strong>Программирование на python</strong><br><br>
