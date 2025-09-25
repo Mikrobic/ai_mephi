@@ -40,4 +40,6 @@ description: "Описание страницы Subpage"
 
 ⑨ 📈 <strong><a href="https://disk.yandex.ru/d/_8nhbSLPvxAeRw">Занятие (23.09.2025) Ⓛ </a></strong><br><br>
 
+①⓪ 🧮 <strong><a href="https://disk.yandex.ru/d/B5kQ9LLERZ028Q">Занятие (24.09.2025) Ⓛ </a></strong><br><br>
+
 </div>
