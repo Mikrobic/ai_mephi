@@ -1,0 +1,1226 @@
+<h1 id="бинарная-классификация-текстов-imdb-с-наивным-байесом">Бинарная классификация текстов (IMDB) с наивным Байесом</h1>
+<p>Решаем задачу по определению положительной/негативной рецензии на данных кинорецензий IMDB.</p>
+<h2 id="план">План</h2>
+<ol type="1">
+<li>Установка пакетов.</li>
+<li>Импорты и фиксирование случайности для генератора СЧ с целью сохранения воспроизводимости результатов.</li>
+<li>Загрузка IMDB с HF и перевод в <code>pandas.DataFrame</code>.</li>
+<li>Быстрый осмотр и баланс классов.</li>
+<li>Разбиение на <code>train/test</code> (80/20) со стратификацией.</li>
+<li>Базовый конвейер для <strong>MultinomialNB</strong> и кросс-валидация (CV).</li>
+<li>Влияние <code>alpha</code> для <strong>MultinomialNB</strong> (с фиксированной токенизацией).</li>
+<li>Сравнение токенизаций: простой <code>.split()</code> и <code>CountVectorizer</code> с (1,1), (1,2), (2,2).</li>
+<li>Сравнение моделей: <strong>MultinomialNB</strong>, <strong>ComplementNB</strong>, <strong>BernoulliNB</strong> (с небольшим набором <code>alpha</code>).</li>
+<li>Финальная оценка лучшей конфигурации на <strong>тесте</strong>: отчёт, матрица ошибок, метрики, ROC-AUC.</li>
+</ol>
+<h2 id="шаг-1.-установка-пакетов">Шаг 1. Установка пакетов</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="op">%</span>pip <span class="op">-</span>q install datasets       <span class="co"># пакет с готовыми датасетами (HuggingFace): удобная загрузка IMDB и др.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="op">%</span>pip <span class="op">-</span>q install scikit<span class="op">-</span>learn   <span class="co"># основная библиотека для классического ML: сплиты, пайплайны, модели, метрики</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a><span class="op">%</span>pip <span class="op">-</span>q install matplotlib     <span class="co"># библиотека для визуализации: графики, матрица ошибок, ROC-кривая</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a><span class="op">%</span>pip <span class="op">-</span>q install pandas         <span class="co"># табличное представление данных (DataFrame)</span></span></code></pre></div>
+<h2 id="шаг-2.-импорты-и-фиксирование-случайности">Шаг 2. Импорты и фиксирование случайности</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset                           <span class="co"># загрузка датасета IMDB</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a><span class="im">import</span> pandas <span class="im">as</span> pd                                                 <span class="co"># DataFrame-формат (таблицы)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split, cross_val_score, StratifiedKFold  <span class="co"># сплит и CV</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline                               <span class="co"># конвейер: препроцессинг → модель</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true"></a><span class="im">from</span> sklearn.feature_extraction.text <span class="im">import</span> CountVectorizer         <span class="co"># мешок СЧЁТЧИКОВ токенов, поддерживает n-граммы</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true"></a><span class="im">from</span> sklearn.naive_bayes <span class="im">import</span> MultinomialNB, ComplementNB, BernoulliNB  <span class="co"># три варианта NB</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report, ConfusionMatrixDisplay, roc_curve, roc_auc_score  <span class="co"># метрики и графики</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true"></a><span class="im">import</span> numpy <span class="im">as</span> np                                                  <span class="co"># векторные операции</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true"></a><span class="im">import</span> random                                                       <span class="co"># базовый ГСЧ Python</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true"></a><span class="im">import</span> os                                                           <span class="co"># переменные окружения</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt                                     <span class="co"># построение графиков в ноутбуке</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true"></a>RANDOM_STATE <span class="op">=</span> <span class="dv">42</span>                                                   <span class="co"># единое &quot;зерно&quot; случайности</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true"></a>random.seed(RANDOM_STATE)                                           <span class="co"># фиксируем ГСЧ Python</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true"></a>np.random.seed(RANDOM_STATE)                                        <span class="co"># фиксируем ГСЧ NumPy</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true"></a>os.environ[<span class="st">&quot;PYTHONHASHSEED&quot;</span>] <span class="op">=</span> <span class="bu">str</span>(RANDOM_STATE)                    <span class="co"># стабилизируем хеширование строк/объектов</span></span></code></pre></div>
+<h2 id="шаг-3.-загрузка-imdb-и-перевод-в-dataframe">Шаг 3. Загрузка IMDB и перевод в DataFrame</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a>ds <span class="op">=</span> load_dataset(<span class="st">&quot;imdb&quot;</span>)                                <span class="co"># скачиваем и загружаем IMDB словарь со сплитами</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>ds <span class="op">=</span> ds[<span class="st">&quot;train&quot;</span>]                                                    <span class="co"># используем официальный &#39;train&#39; (25k размеченных отзывов)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>df <span class="op">=</span> ds.to_pandas()                                                 <span class="co"># переводим в pandas.DataFrame</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a>df.head(<span class="dv">3</span>)                                                          <span class="co"># первые 3 строки — быстрый визуальный контроль</span></span></code></pre></div>
+<pre><code>/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_auth.py:94: UserWarning: 
+The secret `HF_TOKEN` does not exist in your Colab secrets.
+To authenticate with the Hugging Face Hub, create a token in your settings tab (https://huggingface.co/settings/tokens), set it as secret in your Google Colab and restart your session.
+You will be able to reuse this secret in all of your notebooks.
+Please note that authentication is recommended but still optional to access public models or datasets.
+  warnings.warn(
+
+
+
+README.md: 0.00B [00:00, ?B/s]
+
+
+
+plain_text/train-00000-of-00001.parquet:   0%|          | 0.00/21.0M [00:00&lt;?, ?B/s]
+
+
+
+plain_text/test-00000-of-00001.parquet:   0%|          | 0.00/20.5M [00:00&lt;?, ?B/s]
+
+
+
+plain_text/unsupervised-00000-of-00001.p(…):   0%|          | 0.00/42.0M [00:00&lt;?, ?B/s]
+
+
+
+Generating train split:   0%|          | 0/25000 [00:00&lt;?, ? examples/s]
+
+
+
+Generating test split:   0%|          | 0/25000 [00:00&lt;?, ? examples/s]
+
+
+
+Generating unsupervised split:   0%|          | 0/50000 [00:00&lt;?, ? examples/s]</code></pre>
+<div id="df-2bef25ef-e6ae-42a6-a0a9-48df975055b9" class="colab-df-container">
+<pre><code>&lt;div&gt;</code></pre>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th>
+</th>
+<th>
+text
+</th>
+<th>
+label
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>
+0
+</th>
+<td>
+I rented I AM CURIOUS-YELLOW from my video sto…
+</td>
+<td>
+0
+</td>
+</tr>
+<tr>
+<th>
+1
+</th>
+<td>
+“I Am Curious: Yellow” is a risible and preten…
+</td>
+<td>
+0
+</td>
+</tr>
+<tr>
+<th>
+2
+</th>
+<td>
+If only to avoid making this type of film in t…
+</td>
+<td>
+0
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre><code>&lt;div class=&quot;colab-df-buttons&quot;&gt;</code></pre>
+<div class="colab-df-container">
+<pre><code>&lt;button class=&quot;colab-df-convert&quot; onclick=&quot;convertToInteractive(&#39;df-2bef25ef-e6ae-42a6-a0a9-48df975055b9&#39;)&quot;
+        title=&quot;Convert this dataframe to an interactive table.&quot;
+        style=&quot;display:none;&quot;&gt;</code></pre>
+<p><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"> <path d="M120-120v-720h720v720H120Zm60-500h600v-160H180v160Zm220 220h160v-160H400v160Zm0 220h160v-160H400v160ZM180-400h160v-160H180v160Zm440 0h160v-160H620v160ZM180-180h160v-160H180v160Zm440 0h160v-160H620v160Z"/> </svg> </button></p>
+<style>
+    .colab-df-container {
+      display:flex;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    .colab-df-buttons div {
+      margin-bottom: 4px;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+<pre><code>&lt;script&gt;
+  const buttonEl =
+    document.querySelector(&#39;#df-2bef25ef-e6ae-42a6-a0a9-48df975055b9 button.colab-df-convert&#39;);
+  buttonEl.style.display =
+    google.colab.kernel.accessAllowed ? &#39;block&#39; : &#39;none&#39;;
+
+  async function convertToInteractive(key) {
+    const element = document.querySelector(&#39;#df-2bef25ef-e6ae-42a6-a0a9-48df975055b9&#39;);
+    const dataTable =
+      await google.colab.kernel.invokeFunction(&#39;convertToInteractive&#39;,
+                                                [key], {});
+    if (!dataTable) return;
+
+    const docLinkHtml = &#39;Like what you see? Visit the &#39; +
+      &#39;&lt;a target=&quot;_blank&quot; href=https://colab.research.google.com/notebooks/data_table.ipynb&gt;data table notebook&lt;/a&gt;&#39;
+      + &#39; to learn more about interactive tables.&#39;;
+    element.innerHTML = &#39;&#39;;
+    dataTable[&#39;output_type&#39;] = &#39;display_data&#39;;
+    await google.colab.output.renderOutput(dataTable, element);
+    const docLink = document.createElement(&#39;div&#39;);
+    docLink.innerHTML = docLinkHtml;
+    element.appendChild(docLink);
+  }
+&lt;/script&gt;</code></pre>
+</div>
+<pre><code>&lt;div id=&quot;df-c4881616-c01f-4a7e-b859-65f0122ae870&quot;&gt;
+  &lt;button class=&quot;colab-df-quickchart&quot; onclick=&quot;quickchart(&#39;df-c4881616-c01f-4a7e-b859-65f0122ae870&#39;)&quot;
+            title=&quot;Suggest charts&quot;
+            style=&quot;display:none;&quot;&gt;</code></pre>
+<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px">
+<g> <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/> </g>
+</svg>
+<pre><code>  &lt;/button&gt;</code></pre>
+<style>
+  .colab-df-quickchart {
+      --bg-color: #E8F0FE;
+      --fill-color: #1967D2;
+      --hover-bg-color: #E2EBFA;
+      --hover-fill-color: #174EA6;
+      --disabled-fill-color: #AAA;
+      --disabled-bg-color: #DDD;
+  }
+
+  [theme=dark] .colab-df-quickchart {
+      --bg-color: #3B4455;
+      --fill-color: #D2E3FC;
+      --hover-bg-color: #434B5C;
+      --hover-fill-color: #FFFFFF;
+      --disabled-bg-color: #3B4455;
+      --disabled-fill-color: #666;
+  }
+
+  .colab-df-quickchart {
+    background-color: var(--bg-color);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+    fill: var(--fill-color);
+    height: 32px;
+    padding: 0;
+    width: 32px;
+  }
+
+  .colab-df-quickchart:hover {
+    background-color: var(--hover-bg-color);
+    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    fill: var(--button-hover-fill-color);
+  }
+
+  .colab-df-quickchart-complete:disabled,
+  .colab-df-quickchart-complete:disabled:hover {
+    background-color: var(--disabled-bg-color);
+    fill: var(--disabled-fill-color);
+    box-shadow: none;
+  }
+
+  .colab-df-spinner {
+    border: 2px solid var(--fill-color);
+    border-color: transparent;
+    border-bottom-color: var(--fill-color);
+    animation:
+      spin 1s steps(1) infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      border-color: transparent;
+      border-bottom-color: var(--fill-color);
+      border-left-color: var(--fill-color);
+    }
+    20% {
+      border-color: transparent;
+      border-left-color: var(--fill-color);
+      border-top-color: var(--fill-color);
+    }
+    30% {
+      border-color: transparent;
+      border-left-color: var(--fill-color);
+      border-top-color: var(--fill-color);
+      border-right-color: var(--fill-color);
+    }
+    40% {
+      border-color: transparent;
+      border-right-color: var(--fill-color);
+      border-top-color: var(--fill-color);
+    }
+    60% {
+      border-color: transparent;
+      border-right-color: var(--fill-color);
+    }
+    80% {
+      border-color: transparent;
+      border-right-color: var(--fill-color);
+      border-bottom-color: var(--fill-color);
+    }
+    90% {
+      border-color: transparent;
+      border-bottom-color: var(--fill-color);
+    }
+  }
+</style>
+<pre><code>  &lt;script&gt;
+    async function quickchart(key) {
+      const quickchartButtonEl =
+        document.querySelector(&#39;#&#39; + key + &#39; button&#39;);
+      quickchartButtonEl.disabled = true;  // To prevent multiple clicks.
+      quickchartButtonEl.classList.add(&#39;colab-df-spinner&#39;);
+      try {
+        const charts = await google.colab.kernel.invokeFunction(
+            &#39;suggestCharts&#39;, [key], {});
+      } catch (error) {
+        console.error(&#39;Error during call to suggestCharts:&#39;, error);
+      }
+      quickchartButtonEl.classList.remove(&#39;colab-df-spinner&#39;);
+      quickchartButtonEl.classList.add(&#39;colab-df-quickchart-complete&#39;);
+    }
+    (() =&gt; {
+      let quickchartButtonEl =
+        document.querySelector(&#39;#df-c4881616-c01f-4a7e-b859-65f0122ae870 button&#39;);
+      quickchartButtonEl.style.display =
+        google.colab.kernel.accessAllowed ? &#39;block&#39; : &#39;none&#39;;
+    })();
+  &lt;/script&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+</div>
+<h2 id="шаг-4.-быстрый-осмотр-и-баланс-классов">Шаг 4. Быстрый осмотр и баланс классов</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true"></a>df.tail(<span class="dv">3</span>)                                              <span class="co"># последние 3 строки — проверяем, что всё ок до конца таблицы</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true"></a>df[<span class="st">&#39;label&#39;</span>].value_counts().sort_index()                             <span class="co"># количество объектов в каждом классе (0=neg, 1=pos)</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true"></a>df[<span class="st">&#39;label&#39;</span>].value_counts(normalize<span class="op">=</span><span class="va">True</span>).<span class="bu">round</span>(<span class="dv">3</span>).sort_index()      <span class="co"># доли классов (в сумме ≈1.0)</span></span></code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th>
+</th>
+<th>
+proportion
+</th>
+</tr>
+<tr>
+<th>
+label
+</th>
+<th>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>
+0
+</th>
+<td>
+0.5
+</td>
+</tr>
+<tr>
+<th>
+1
+</th>
+<td>
+0.5
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><br><label><b>dtype:</b> float64</label></p>
+<h2 id="шаг-5.-разбиваем-на-traintest-8020-со-стратификацией-необязательно">Шаг 5. Разбиваем на train/test (80/20) со стратификацией (необязательно)</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a>X <span class="op">=</span> df[<span class="st">&#39;text&#39;</span>].tolist()                                  <span class="co"># все тексты как список строк</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true"></a>y <span class="op">=</span> df[<span class="st">&#39;label&#39;</span>].tolist()                                             <span class="co"># все метки (0/1) как список</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(                <span class="co"># один сплит: обучающая и тестовая части</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true"></a>    X, y,                                                           <span class="co"># полный набор текстов и меток</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true"></a>    test_size<span class="op">=</span><span class="fl">0.20</span>,                                                 <span class="co"># 20% оставляем на финальную оценку</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true"></a>    stratify<span class="op">=</span>y,                                                     <span class="co"># сохраняем баланс классов в обеих частях</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true"></a>    random_state<span class="op">=</span>RANDOM_STATE                                       <span class="co"># фиксируем сид для воспроизводимости</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true"></a>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true"></a><span class="bu">len</span>(X_train), <span class="bu">len</span>(X_test)                                           <span class="co"># контроль размеров (≈ 80% и 20%)</span></span></code></pre></div>
+<pre><code>(20000, 5000)</code></pre>
+<h2 id="шаг-6.-базовый-конвейер-countvectorizer1-2-граммы-multinomialnbalpha1.0---cv-оценка">Шаг 6. Базовый конвейер: CountVectorizer(1-2-граммы) + MultinomialNB(alpha=1.0) -&gt; CV-оценка</h2>
+<div class="sourceCode" id="cb15"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true"></a>pipe_base <span class="op">=</span> Pipeline([                                   <span class="co"># собираем базовый конвейер</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true"></a>    (<span class="st">&#39;vect&#39;</span>, CountVectorizer(min_df<span class="op">=</span><span class="dv">5</span>, ngram_range<span class="op">=</span>(<span class="dv">1</span>,<span class="dv">2</span>))),          <span class="co"># униграммы+биграммы; отбрасываем редкие слова (min_df=5) для скорости</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true"></a>    (<span class="st">&#39;clf&#39;</span>, MultinomialNB(alpha<span class="op">=</span><span class="fl">1.0</span>)),                                <span class="co"># MultinomialNB со сглаживанием по умолчанию</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true"></a>])</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true"></a>cv <span class="op">=</span> StratifiedKFold(n_splits<span class="op">=</span><span class="dv">3</span>, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span>RANDOM_STATE)  <span class="co"># 3-фолдовая CV для скорости</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true"></a>cv_scores <span class="op">=</span> cross_val_score(                                         <span class="co"># оцениваем модель на обучающей части</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true"></a>    pipe_base, X_train, y_train,                                     <span class="co"># обучаем и валидируем только внутри train</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true"></a>    cv<span class="op">=</span>cv, scoring<span class="op">=</span><span class="st">&#39;f1&#39;</span>                                              <span class="co"># метрика F1 (подходит для сбалансированных классов)</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true"></a>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true"></a><span class="bu">print</span>(<span class="ss">f&#39;CV F1 mean ± std: </span><span class="sc">{</span>cv_scores<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss"> ± </span><span class="sc">{</span>cv_scores<span class="sc">.</span>std()<span class="sc">:.3f}</span><span class="ss">&#39;</span>) <span class="co"># печатаем среднее и разброс</span></span></code></pre></div>
+<pre><code>CV F1 mean ± std: 0.867 ± 0.005</code></pre>
+<h2 id="шаг-7.-влияние-alpha-для-multinomialnb-фиксируем-токенизацию-униби-граммы">Шаг 7. Влияние <code>alpha</code> для MultinomialNB (фиксируем токенизацию: уни+би-граммы)</h2>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true"></a>alphas <span class="op">=</span> [<span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.05</span>, <span class="fl">0.75</span>]          <span class="co"># набор значений сглаживания</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true"></a>results_alpha <span class="op">=</span> {}                        <span class="co"># сюда сложим результаты</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true"></a><span class="cf">for</span> a <span class="kw">in</span> alphas:                          <span class="co"># перебираем alpha</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true"></a>    pipe <span class="op">=</span> Pipeline([</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true"></a>        (<span class="st">&#39;vect&#39;</span>, CountVectorizer(min_df<span class="op">=</span><span class="dv">5</span>, ngram_range<span class="op">=</span>(<span class="dv">1</span>, <span class="dv">2</span>))),  <span class="co"># униграммы+биграммы, min_df=5</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true"></a>        (<span class="st">&#39;clf&#39;</span>, MultinomialNB(alpha<span class="op">=</span>a)),  <span class="co"># текущее значение alpha</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true"></a>    ])</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true"></a>    scores <span class="op">=</span> cross_val_score(pipe, X_train, y_train, cv<span class="op">=</span>cv, scoring<span class="op">=</span><span class="st">&#39;f1&#39;</span>)  <span class="co"># F1 в кросс-валидации</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true"></a>    results_alpha[a] <span class="op">=</span> [scores.mean(), scores.std()]  <span class="co"># сохраняем среднее и std</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true"></a><span class="co"># Печатаем сводку по alpha</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true"></a><span class="cf">for</span> a <span class="kw">in</span> results_alpha.keys():</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true"></a>    <span class="bu">print</span>(<span class="ss">f&#39;alpha=</span><span class="sc">{a}</span><span class="ss">: CV F1=</span><span class="sc">{</span>results_alpha[a][<span class="dv">0</span>]<span class="sc">:.4f}</span><span class="ss"> ± </span><span class="sc">{</span>results_alpha[a][<span class="dv">1</span>]<span class="sc">:.4f}</span><span class="ss">&#39;</span>)</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true"></a></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true"></a><span class="co"># Поиск лучшего alpha</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true"></a>best_alpha, best_f1 <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true"></a><span class="cf">for</span> alpha, (mean_f1, std_f1) <span class="kw">in</span> results_alpha.items():</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true"></a>    <span class="cf">if</span> mean_f1 <span class="op">&gt;</span> best_f1:</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true"></a>        best_f1 <span class="op">=</span> mean_f1</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true"></a>        best_alpha <span class="op">=</span> alpha</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true"></a></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&#39;Лучший alpha по CV:&#39;</span>, best_alpha)</span></code></pre></div>
+<pre><code>alpha=0.1: CV F1=0.8705 ± 0.0046
+alpha=0.25: CV F1=0.8691 ± 0.0043
+alpha=0.05: CV F1=0.8714 ± 0.0053
+alpha=0.75: CV F1=0.8680 ± 0.0041
+Лучший alpha по CV: 0.05</code></pre>
+<h2 id="шаг-8.-сравнение-токенизаций-для-выбранного-alpha">Шаг 8. Сравнение токенизаций (для выбранного <code>alpha</code>)</h2>
+<div class="sourceCode" id="cb19"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true"></a>tokenizations <span class="op">=</span> {                                       <span class="co"># варианты токенизации</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true"></a>    <span class="st">&#39;split_unigram&#39;</span>: CountVectorizer(tokenizer<span class="op">=</span><span class="bu">str</span>.split,           <span class="co"># ИСПОЛЬЗУЕМ простой split по пробелам</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true"></a>                                     preprocessor<span class="op">=</span><span class="va">None</span>,             <span class="co"># без доп. предобработки</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true"></a>                                     lowercase<span class="op">=</span><span class="va">True</span>,                <span class="co"># приводим к нижнему регистру</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true"></a>                                     token_pattern<span class="op">=</span><span class="va">None</span>,            <span class="co"># отключаем regex-токенизацию</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true"></a>                                     min_df<span class="op">=</span><span class="dv">5</span>),                     <span class="co"># отбрасываем редкие токены для скорости</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true"></a>    <span class="st">&#39;cv_unigram&#39;</span>:   CountVectorizer(ngram_range<span class="op">=</span>(<span class="dv">1</span>,<span class="dv">1</span>), min_df<span class="op">=</span><span class="dv">5</span>),   <span class="co"># только униграммы</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true"></a>    <span class="st">&#39;cv_uni_bi&#39;</span>:    CountVectorizer(ngram_range<span class="op">=</span>(<span class="dv">1</span>,<span class="dv">2</span>), min_df<span class="op">=</span><span class="dv">5</span>),   <span class="co"># униграммы+биграммы</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true"></a>    <span class="st">&#39;cv_bigram&#39;</span>:    CountVectorizer(ngram_range<span class="op">=</span>(<span class="dv">2</span>,<span class="dv">2</span>), min_df<span class="op">=</span><span class="dv">10</span>)   <span class="co"># только биграммы, min_df=10 для компактности</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true"></a>}</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true"></a>results_tok <span class="op">=</span> []                                                    <span class="co"># сюда будем складывать результаты</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true"></a><span class="cf">for</span> name, vect <span class="kw">in</span> tokenizations.items():                            <span class="co"># перебор по вариантам токенизации</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true"></a>    pipe <span class="op">=</span> Pipeline([                                               <span class="co"># конвейер: токенизация -&gt; NB</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true"></a>        (<span class="st">&#39;vect&#39;</span>, vect),                                             <span class="co"># текущий векторизатор</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true"></a>        (<span class="st">&#39;clf&#39;</span>, MultinomialNB(alpha<span class="op">=</span>best_alpha)),                   <span class="co"># лучший alpha из шага 7</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true"></a>    ])</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true"></a>    scores <span class="op">=</span> cross_val_score(pipe, X_train, y_train, cv<span class="op">=</span>cv, scoring<span class="op">=</span><span class="st">&#39;f1&#39;</span>)  <span class="co"># CV-оценка на train</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true"></a>    results_tok.append((name, scores.mean(), scores.std()))         <span class="co"># сохраняем среднее и std</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true"></a></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true"></a><span class="cf">for</span> name, m, s <span class="kw">in</span> results_tok:                                      <span class="co"># печатаем сводку</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true"></a>    <span class="bu">print</span>(<span class="ss">f&#39;</span><span class="sc">{</span>name<span class="sc">:12s}</span><span class="ss">: CV F1=</span><span class="sc">{m:.4f}</span><span class="ss"> ± </span><span class="sc">{s:.4f}</span><span class="ss">&#39;</span>)                   <span class="co"># строка отчёта</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true"></a></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true"></a><span class="co"># Поиск лучшей токенизации</span></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true"></a>best_tok, best_f1 <span class="op">=</span> <span class="va">None</span>, <span class="op">-</span><span class="fl">1.0</span>                                      <span class="co"># инициализируем «лучший» вариант</span></span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true"></a><span class="cf">for</span> name, mean_f1, std_f1 <span class="kw">in</span> results_tok:                           <span class="co"># перебор результатов</span></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true"></a>    <span class="cf">if</span> mean_f1 <span class="op">&gt;</span> best_f1:                                           <span class="co"># обновляем, если F1 стал лучше</span></span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true"></a>        best_f1 <span class="op">=</span> mean_f1                                           <span class="co"># сохраняем лучший F1</span></span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true"></a>        best_tok <span class="op">=</span> name                                             <span class="co"># и имя лучшего токенизатора</span></span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true"></a></span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&#39;Лучший токенизатор по CV:&#39;</span>, best_tok)                        <span class="co"># отчёт о победителе</span></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true"></a></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true"></a><span class="co"># --- Кладём ЛУЧШУЮ MultinomialNB (пайплайн) в словарь</span></span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true"></a>best_vect <span class="op">=</span> tokenizations[best_tok]                                 <span class="co"># берём лучший векторизатор</span></span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true"></a>mnb_best <span class="op">=</span> Pipeline([(<span class="st">&#39;vect&#39;</span>, best_vect), (<span class="st">&#39;clf&#39;</span>, MultinomialNB(alpha<span class="op">=</span>best_alpha))])  <span class="co"># собираем пайплайн</span></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true"></a>mnb_best.fit(X_train, y_train)                                      <span class="co"># обучаем на всей тренировочной части</span></span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true"></a>models <span class="op">=</span> {}</span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true"></a></span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true"></a>models[<span class="st">&#39;MultinomialNB&#39;</span>] <span class="op">=</span> mnb_best                                  <span class="co"># сохраняем обученный пайплайн в словарь</span></span></code></pre></div>
+<pre><code>split_unigram: CV F1=0.8365 ± 0.0061
+cv_unigram  : CV F1=0.8375 ± 0.0047
+cv_uni_bi   : CV F1=0.8714 ± 0.0053
+cv_bigram   : CV F1=0.8678 ± 0.0029
+Лучший токенизатор по CV: cv_uni_bi</code></pre>
+<h2 id="шаг-9.-сравнение-multinomialnb-с-complementnb-и-bernoullinb">Шаг 9. Сравнение MultinomialNB с ComplementNB и BernoulliNB</h2>
+<div class="sourceCode" id="cb21"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true"></a><span class="co"># --- Фиксированный токенайзер (лучший из прошлого шага) + простой перебор МОДЕЛЕЙ и alpha ---</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true"></a>vect <span class="op">=</span> tokenizations[best_tok]                         <span class="co"># берём заранее выбранный лучший токенайзер</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true"></a>alphas <span class="op">=</span> [<span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.05</span>, <span class="fl">0.75</span>]                       <span class="co"># набор значений сглаживания для перебора</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true"></a>models_to_try <span class="op">=</span> [<span class="st">&#39;ComplementNB&#39;</span>, <span class="st">&#39;BernoulliNB&#39;</span>]        <span class="co"># какие модели проверяем (по именам)</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true"></a>results <span class="op">=</span> []                                           <span class="co"># сюда складываем строки с результатами (для печати)</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true"></a>best_by_model <span class="op">=</span> {}                                     <span class="co"># сюда запишем лучший alpha и лучший F1 по каждой модели</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true"></a></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true"></a><span class="cf">for</span> model_name <span class="kw">in</span> models_to_try:                       <span class="co"># идём по моделям</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true"></a>    best_alpha_for_model <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>                        <span class="co"># сюда положим лучший alpha для текущей модели</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true"></a>    best_f1_for_model <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>                          <span class="co"># сюда лучший средний F1 по CV для этой модели</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true"></a></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true"></a>    <span class="cf">for</span> a <span class="kw">in</span> alphas:                                   <span class="co"># перебор значений alpha</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true"></a>        <span class="cf">if</span> model_name <span class="op">==</span> <span class="st">&#39;BernoulliNB&#39;</span>:                <span class="co"># создаём классификатор с нужными параметрами</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true"></a>            clf <span class="op">=</span> BernoulliNB(alpha<span class="op">=</span>a, binarize<span class="op">=</span><span class="fl">0.0</span>)   <span class="co"># для BernoulliNB бинаризация: count&gt;0 → 1</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true"></a>        <span class="cf">else</span>:</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true"></a>            clf <span class="op">=</span> ComplementNB(alpha<span class="op">=</span>a)                <span class="co"># для ComplementNB только alpha</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true"></a></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true"></a>        pipe <span class="op">=</span> Pipeline([                              <span class="co"># конвейер из двух шагов</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true"></a>            (<span class="st">&#39;vect&#39;</span>, vect),                            <span class="co"># шаг 1: векторизация текста</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true"></a>            (<span class="st">&#39;clf&#39;</span>,  clf),                             <span class="co"># шаг 2: классификатор</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true"></a>        ])</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true"></a></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true"></a>        scores <span class="op">=</span> cross_val_score(                      <span class="co"># кросс-валидация ТОЛЬКО на train</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true"></a>            pipe, X_train, y_train,</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true"></a>            cv<span class="op">=</span>cv, scoring<span class="op">=</span><span class="st">&#39;f1&#39;</span>                        <span class="co"># метрика F1</span></span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true"></a>        )</span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true"></a>        mean_f1 <span class="op">=</span> scores.mean()                        <span class="co"># средний F1 по фолдам</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true"></a>        std_f1  <span class="op">=</span> scores.std()                         <span class="co"># стандартное отклонение F1 по фолдам</span></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true"></a></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true"></a>        results.append((model_name, a, mean_f1, std_f1))          <span class="co"># сохраняем строку с результатом</span></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true"></a>        <span class="cf">if</span> mean_f1 <span class="op">&gt;</span> best_f1_for_model:                           <span class="co"># если стало лучше — обновляем «лучший»</span></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true"></a>            best_f1_for_model <span class="op">=</span> mean_f1                           <span class="co"># лучший F1 для модели</span></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true"></a>            best_alpha_for_model <span class="op">=</span> a                              <span class="co"># лучший alpha для модели</span></span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true"></a></span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true"></a>    best_by_model[model_name] <span class="op">=</span> (best_alpha_for_model, best_f1_for_model)   <span class="co"># фиксируем лучшую пару</span></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true"></a></span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true"></a><span class="co"># Печать таблички результатов</span></span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&#39;Модель         alpha   CV F1 (mean ± std)&#39;</span>)</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true"></a><span class="cf">for</span> model_name, a, m, s <span class="kw">in</span> results:                  <span class="co"># просто пройдёмся по собранным строкам</span></span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true"></a>    <span class="bu">print</span>(<span class="ss">f&#39;</span><span class="sc">{</span>model_name<span class="sc">:13s}</span><span class="ss"> </span><span class="sc">{a:&gt;5}</span><span class="ss">   </span><span class="sc">{m:.3f}</span><span class="ss"> ± </span><span class="sc">{s:.3f}</span><span class="ss">&#39;</span>)</span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true"></a></span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true"></a><span class="co"># Печать лучших alpha по каждой модели</span></span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&#39;</span><span class="ch">\n</span><span class="st">Лучшие настройки (фикс. токенайзер:&#39;</span>, best_tok, <span class="st">&#39;):&#39;</span>)</span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true"></a><span class="cf">for</span> model_name, (a, m) <span class="kw">in</span> best_by_model.items():</span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true"></a>    <span class="bu">print</span>(<span class="ss">f&#39;- </span><span class="sc">{</span>model_name<span class="sc">:13s}</span><span class="ss">: alpha=</span><span class="sc">{a}</span><span class="ss">, CV F1=</span><span class="sc">{m:.3f}</span><span class="ss">&#39;</span>)</span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true"></a></span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true"></a><span class="cf">for</span> model_name, (a, m) <span class="kw">in</span> best_by_model.items():      <span class="co"># для каждой модели создаём финальный пайплайн</span></span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true"></a>    <span class="cf">if</span> model_name <span class="op">==</span> <span class="st">&#39;BernoulliNB&#39;</span>:</span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true"></a>        clf_best <span class="op">=</span> BernoulliNB(alpha<span class="op">=</span>a, binarize<span class="op">=</span><span class="fl">0.0</span>) <span class="co"># BernoulliNB с лучшим alpha</span></span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true"></a>    <span class="cf">else</span>:</span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true"></a>        clf_best <span class="op">=</span> ComplementNB(alpha<span class="op">=</span>a)              <span class="co"># ComplementNB с лучшим alpha</span></span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true"></a></span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true"></a>    pipe_best <span class="op">=</span> Pipeline([</span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true"></a>        (<span class="st">&#39;vect&#39;</span>, vect),                                <span class="co"># тот же фиксированный токенайзер</span></span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true"></a>        (<span class="st">&#39;clf&#39;</span>,  clf_best),                            <span class="co"># лучший классификатор</span></span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true"></a>    ])</span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true"></a>    pipe_best.fit(X_train, y_train)                    <span class="co"># обучение на всей тренировочной части</span></span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true"></a></span>
+<span id="cb21-61"><a href="#cb21-61" aria-hidden="true"></a>    models[model_name] <span class="op">=</span> pipe_best                     <span class="co"># кладём обученный пайплайн в словарь</span></span>
+<span id="cb21-62"><a href="#cb21-62" aria-hidden="true"></a>    <span class="bu">print</span>(<span class="ss">f&quot;Сохранено: models[&#39;</span><span class="sc">{</span>model_name<span class="sc">}</span><span class="ss">&#39;] (alpha=</span><span class="sc">{a}</span><span class="ss">, tokenizer=</span><span class="sc">{</span>best_tok<span class="sc">}</span><span class="ss">).&quot;</span>)</span></code></pre></div>
+<pre><code>Модель         alpha   CV F1 (mean ± std)
+ComplementNB    0.1   0.871 ± 0.005
+ComplementNB   0.25   0.869 ± 0.004
+ComplementNB   0.05   0.871 ± 0.005
+ComplementNB   0.75   0.868 ± 0.004
+BernoulliNB     0.1   0.875 ± 0.006
+BernoulliNB    0.25   0.874 ± 0.006
+BernoulliNB    0.05   0.876 ± 0.006
+BernoulliNB    0.75   0.873 ± 0.006
+
+Лучшие настройки (фикс. токенайзер: cv_uni_bi ):
+- ComplementNB : alpha=0.05, CV F1=0.871
+- BernoulliNB  : alpha=0.05, CV F1=0.876
+Сохранено: models[&#39;ComplementNB&#39;] (alpha=0.05, tokenizer=cv_uni_bi).
+Сохранено: models[&#39;BernoulliNB&#39;] (alpha=0.05, tokenizer=cv_uni_bi).</code></pre>
+<h2 id="шаг-10.-финальная-оценка-на-тесте-отчёт-матрица-ошибок-и-roc-auc">Шаг 10. Финальная оценка на тесте: отчёт, матрица ошибок и ROC-AUC</h2>
+<div class="sourceCode" id="cb23"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true"></a><span class="co"># --- Финальная оценка: выбираем лучшую модель и строим метрики/графики ---</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true"></a><span class="co"># Пробегаем по всем моделям в словаре и считаем метрики на тесте</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> f1_score, accuracy_score, roc_auc_score, roc_curve  <span class="co"># метрики</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true"></a>summary <span class="op">=</span> []                                                      <span class="co"># сюда соберём (name, F1_macro, acc, AUC)</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true"></a><span class="cf">for</span> name, pipe <span class="kw">in</span> models.items():                                 <span class="co"># для каждой сохранённой модели</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true"></a>    y_pred  <span class="op">=</span> pipe.predict(X_test)                                 <span class="co"># предсказанные метки</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true"></a>    y_proba <span class="op">=</span> pipe.predict_proba(X_test)[:, <span class="dv">1</span>]                     <span class="co"># вероятность положительного класса</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true"></a>    f1m <span class="op">=</span> f1_score(y_test, y_pred, average<span class="op">=</span><span class="st">&#39;macro&#39;</span>)                <span class="co"># F1_macro</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true"></a>    acc <span class="op">=</span> accuracy_score(y_test, y_pred)                           <span class="co"># accuracy</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true"></a>    auc <span class="op">=</span> roc_auc_score(y_test, y_proba)                           <span class="co"># ROC-AUC</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true"></a>    summary.append((name, f1m, acc, auc))                          <span class="co"># добавляем в сводку</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true"></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>name<span class="sc">:13s}</span><span class="ss"> | F1_macro=</span><span class="sc">{</span>f1m<span class="sc">:.3f}</span><span class="ss"> | acc=</span><span class="sc">{</span>acc<span class="sc">:.3f}</span><span class="ss"> | AUC=</span><span class="sc">{</span>auc<span class="sc">:.3f}</span><span class="ss">&quot;</span>)  <span class="co"># короткий отчёт</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true"></a></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true"></a><span class="co"># Выбираем победителя по F1_macro</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true"></a>best_name, _, _, _ <span class="op">=</span> <span class="bu">max</span>(summary, key<span class="op">=</span><span class="kw">lambda</span> t: t[<span class="dv">1</span>])              <span class="co"># модель с максимальным F1_macro</span></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true"></a>best_pipe <span class="op">=</span> models[best_name]                                      <span class="co"># сам пайплайн победителя</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">Лучшая модель по F1_macro: </span><span class="sc">{</span>best_name<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true"></a></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true"></a><span class="co"># Полный отчёт по лучшей модели</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true"></a>y_pred <span class="op">=</span> best_pipe.predict(X_test)                                  <span class="co"># предсказания лучшей модели</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true"></a><span class="bu">print</span>(classification_report(y_test, y_pred, digits<span class="op">=</span><span class="dv">3</span>))              <span class="co"># подробные precision/recall/F1</span></span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true"></a></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true"></a><span class="co"># Матрица ошибок</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true"></a>_ <span class="op">=</span> ConfusionMatrixDisplay.from_estimator(best_pipe, X_test, y_test)</span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true"></a></span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true"></a><span class="co"># ROC-кривая и ROC-AUC</span></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true"></a>y_proba <span class="op">=</span> best_pipe.predict_proba(X_test)[:, <span class="dv">1</span>]                     <span class="co"># вероятности класса 1</span></span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true"></a>auc <span class="op">=</span> roc_auc_score(y_test, y_proba)                                <span class="co"># ROC-AUC числом</span></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true"></a>fpr, tpr, _ <span class="op">=</span> roc_curve(y_test, y_proba)                            <span class="co"># точки ROC</span></span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true"></a></span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true"></a>plt.figure()                                                        <span class="co"># отдельный график</span></span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true"></a>plt.plot(fpr, tpr, label<span class="op">=</span><span class="ss">f&#39;ROC-AUC = </span><span class="sc">{</span>auc<span class="sc">:.3f}</span><span class="ss">&#39;</span>)                    <span class="co"># ROC-кривая</span></span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true"></a>plt.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], <span class="st">&#39;--&#39;</span>, label<span class="op">=</span><span class="st">&#39;chance&#39;</span>)                      <span class="co"># диагональ «случайного»</span></span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true"></a>plt.xlabel(<span class="st">&#39;False Positive Rate&#39;</span>)                                   <span class="co"># подпись оси X</span></span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true"></a>plt.ylabel(<span class="st">&#39;True Positive Rate&#39;</span>)                                    <span class="co"># подпись оси Y</span></span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true"></a>plt.title(<span class="ss">f&#39;ROC-кривая (тест): </span><span class="sc">{</span>best_name<span class="sc">}</span><span class="ss">&#39;</span>)                        <span class="co"># заголовок</span></span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true"></a>plt.legend()                                                        <span class="co"># легенда</span></span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true"></a>plt.show()                                                          <span class="co"># показать график</span></span></code></pre></div>
+<pre><code>MultinomialNB | F1_macro=0.868 | acc=0.868 | AUC=0.935
+ComplementNB  | F1_macro=0.868 | acc=0.868 | AUC=0.935
+BernoulliNB   | F1_macro=0.873 | acc=0.873 | AUC=0.941
+
+Лучшая модель по F1_macro: BernoulliNB
+              precision    recall  f1-score   support
+
+           0      0.866     0.882     0.874      2500
+           1      0.880     0.863     0.872      2500
+
+    accuracy                          0.873      5000
+   macro avg      0.873     0.873     0.873      5000
+weighted avg      0.873     0.873     0.873      5000</code></pre>
+<figure>
+<img src="https://theonlineconverter.com/uploads/___1758989175_files/___1758989175_21_1.png" alt="" /><figcaption>png</figcaption>
+</figure>
+<figure>
+<img src="https://theonlineconverter.com/uploads/___1758989175_files/___1758989175_21_2.png" alt="" /><figcaption>png</figcaption>
+</figure>
+<ul>
+<li><p><strong>Лучший результат на тесте дал BernoulliNB</strong></p>
+<ul>
+<li><code>F1_macro = 0.873</code>, <code>accuracy = 0.873</code>, <code>ROC-AUC = 0.941</code>.<br />
+</li>
+<li>Для <strong>MultinomialNB</strong> и <strong>ComplementNB</strong> получили практически одинаковые результаты</li>
+</ul></li>
+<li><p><strong>Почему BernoulliNB чуть лучше?</strong><br />
+BernoulliNB использует <strong>бинарные признаки</strong> (наличие/отсутствие токена), что на отзывах IMDB может работать не хуже или чуть лучше счётчиков: важен сам факт упоминания характерных слов/фраз, а не их частота.</p></li>
+<li><p><strong>Матрица ошибок</strong> (на 5000 примеров, классы сбалансированы по 2500):</p>
+<ul>
+<li>Ложно-положительных: 294<br />
+</li>
+<li>Ложно-отрицательных: 342</li>
+</ul></li>
+<li><p><strong>ROC-АUC ≈ 0.94</strong> говорит, что модель хорошо ранжирует положительные отзывы выше отрицательных</p></li>
+</ul>
+<h1 id="классификация-с-наивным-байесом-датасет-weather-play">Классификация с наивным Байесом: датасет “Weather Play”</h1>
+<p>Это “игрушечный” учебный датасет.</p>
+<p><strong>Задача</strong>: предсказать, будет ли играть в гольф человек (<code>Play = Yes/No</code>) в зависимости от погоды и влажности на улице.</p>
+<p>Мы упростим исходные данные до <strong>двух бинарных признаков</strong>: - <code>Outlook = Sunny</code> → 1, иначе 0 - <code>Humidity = High</code> → 1, иначе 0</p>
+<p>Целевая переменная: - <code>Play = Yes</code> → 1 - <code>Play = No</code> → 0</p>
+<p>Всего <strong>5000 наблюдений</strong> посредством случайной генерации.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true"></a><span class="co"># Фиксируем случайность</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true"></a>np.random.seed(<span class="dv">42</span>)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true"></a><span class="co"># Определяем все возможные погодные условия</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true"></a>conditions <span class="op">=</span> [</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true"></a>    (<span class="st">&#39;Sunny&#39;</span>, <span class="st">&#39;High&#39;</span>),</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true"></a>    (<span class="st">&#39;Sunny&#39;</span>, <span class="st">&#39;Low&#39;</span>),</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true"></a>    (<span class="st">&#39;Rainy&#39;</span>, <span class="st">&#39;High&#39;</span>),</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true"></a>    (<span class="st">&#39;Rainy&#39;</span>, <span class="st">&#39;Low&#39;</span>)</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true"></a>]</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true"></a></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true"></a><span class="co"># Вероятности для каждого условия (должны суммироваться в 1)</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true"></a>weather_probs <span class="op">=</span> [<span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>]  <span class="co"># P(Sunny+High), P(Sunny+Low), ...</span></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true"></a></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true"></a><span class="co"># Вероятности Play=Yes для каждого условия</span></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true"></a>play_probs <span class="op">=</span> [<span class="fl">0.2</span>, <span class="fl">0.95</span>, <span class="fl">0.3</span>, <span class="fl">0.8</span>]  <span class="co"># соответствуют условиям</span></span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true"></a></span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true"></a><span class="co"># Генерируем 5000 примеров</span></span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true"></a>n_samples <span class="op">=</span> <span class="dv">5000</span></span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true"></a>outlooks <span class="op">=</span> []</span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true"></a>humidities <span class="op">=</span> []</span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true"></a>plays <span class="op">=</span> []</span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true"></a></span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_samples):</span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true"></a>    <span class="co"># Выбираем ИНДЕКС условия с заданными вероятностями</span></span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true"></a>    idx <span class="op">=</span> np.random.choice(<span class="bu">len</span>(conditions), p<span class="op">=</span>weather_probs)</span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true"></a>    outlook, humidity <span class="op">=</span> conditions[idx]</span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true"></a></span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true"></a>    <span class="co"># Решаем, будет ли игра</span></span>
+<span id="cb25-33"><a href="#cb25-33" aria-hidden="true"></a>    p_yes <span class="op">=</span> play_probs[idx]</span>
+<span id="cb25-34"><a href="#cb25-34" aria-hidden="true"></a>    play <span class="op">=</span> np.random.choice([<span class="st">&#39;Yes&#39;</span>, <span class="st">&#39;No&#39;</span>], p<span class="op">=</span>[p_yes, <span class="dv">1</span> <span class="op">-</span> p_yes])</span>
+<span id="cb25-35"><a href="#cb25-35" aria-hidden="true"></a></span>
+<span id="cb25-36"><a href="#cb25-36" aria-hidden="true"></a>    outlooks.append(outlook)</span>
+<span id="cb25-37"><a href="#cb25-37" aria-hidden="true"></a>    humidities.append(humidity)</span>
+<span id="cb25-38"><a href="#cb25-38" aria-hidden="true"></a>    plays.append(play)</span>
+<span id="cb25-39"><a href="#cb25-39" aria-hidden="true"></a></span>
+<span id="cb25-40"><a href="#cb25-40" aria-hidden="true"></a><span class="co"># Создаём DataFrame</span></span>
+<span id="cb25-41"><a href="#cb25-41" aria-hidden="true"></a>df_large <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb25-42"><a href="#cb25-42" aria-hidden="true"></a>    <span class="st">&#39;Outlook&#39;</span>: outlooks,</span>
+<span id="cb25-43"><a href="#cb25-43" aria-hidden="true"></a>    <span class="st">&#39;Humidity&#39;</span>: humidities,</span>
+<span id="cb25-44"><a href="#cb25-44" aria-hidden="true"></a>    <span class="st">&#39;Play&#39;</span>: plays</span>
+<span id="cb25-45"><a href="#cb25-45" aria-hidden="true"></a>})</span>
+<span id="cb25-46"><a href="#cb25-46" aria-hidden="true"></a></span>
+<span id="cb25-47"><a href="#cb25-47" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Сгенерированный датасет (5000 строк):&quot;</span>)</span>
+<span id="cb25-48"><a href="#cb25-48" aria-hidden="true"></a><span class="bu">print</span>(df_large.head(<span class="dv">10</span>))</span>
+<span id="cb25-49"><a href="#cb25-49" aria-hidden="true"></a></span>
+<span id="cb25-50"><a href="#cb25-50" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Распределение классов:&quot;</span>)</span>
+<span id="cb25-51"><a href="#cb25-51" aria-hidden="true"></a><span class="bu">print</span>(df_large[<span class="st">&#39;Play&#39;</span>].value_counts(normalize<span class="op">=</span><span class="va">True</span>).<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb25-52"><a href="#cb25-52" aria-hidden="true"></a></span>
+<span id="cb25-53"><a href="#cb25-53" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Количество по условиям:&quot;</span>)</span>
+<span id="cb25-54"><a href="#cb25-54" aria-hidden="true"></a><span class="bu">print</span>(df_large.groupby([<span class="st">&#39;Outlook&#39;</span>, <span class="st">&#39;Humidity&#39;</span>]).size())</span></code></pre></div>
+<pre><code>Сгенерированный датасет (5000 строк):
+  Outlook Humidity Play
+0   Sunny      Low   No
+1   Rainy     High   No
+2   Sunny     High  Yes
+3   Sunny     High   No
+4   Rainy     High   No
+5   Sunny     High   No
+6   Rainy      Low  Yes
+7   Sunny     High  Yes
+8   Sunny      Low  Yes
+9   Sunny      Low  Yes
+
+Распределение классов:
+Play
+Yes    0.502
+No     0.498
+Name: proportion, dtype: float64
+
+Количество по условиям:
+Outlook  Humidity
+Rainy    High        1493
+         Low          958
+Sunny    High        1547
+         Low         1002
+dtype: int64</code></pre>
+<h2 id="преобразуем-в-бинарные-признаки">Преобразуем в бинарные признаки</h2>
+<p>Для упрощения сделаем:</p>
+<ul>
+<li><code>sunny</code> = 1, если солнечно, иначе 0<br />
+</li>
+<li><code>high_humidity</code> = 1, иначе 0<br />
+</li>
+<li><code>play</code> = 1, если идем играть и 0 иначе</li>
+</ul>
+<div class="sourceCode" id="cb27"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true"></a><span class="co"># Бинаризуем</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true"></a>df_bin_large <span class="op">=</span> pd.DataFrame()</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true"></a>df_bin_large[<span class="st">&#39;sunny&#39;</span>] <span class="op">=</span> (df_large[<span class="st">&#39;Outlook&#39;</span>] <span class="op">==</span> <span class="st">&#39;Sunny&#39;</span>).astype(<span class="bu">int</span>)      <span class="co"># 1 = Sunny, 0 = Rainy</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true"></a>df_bin_large[<span class="st">&#39;high_humidity&#39;</span>] <span class="op">=</span> (df_large[<span class="st">&#39;Humidity&#39;</span>] <span class="op">==</span> <span class="st">&#39;High&#39;</span>).astype(<span class="bu">int</span>)  <span class="co"># 1 = High, 0 = Low</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true"></a>df_bin_large[<span class="st">&#39;play&#39;</span>] <span class="op">=</span> (df_large[<span class="st">&#39;Play&#39;</span>] <span class="op">==</span> <span class="st">&#39;Yes&#39;</span>).astype(<span class="bu">int</span>)            <span class="co"># 1 = Yes, 0 = No</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true"></a></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Бинарный датасет (первые 5 строк):&quot;</span>)</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true"></a><span class="bu">print</span>(df_bin_large.head())</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true"></a></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Форма данных:&quot;</span>, df_bin_large.shape)</span></code></pre></div>
+<pre><code>Бинарный датасет (первые 5 строк):
+   sunny  high_humidity  play
+0      1              0     0
+1      0              1     0
+2      1              1     1
+3      1              1     0
+4      0              1     0
+
+Форма данных: (5000, 3)</code></pre>
+<h2 id="разделение-на-признаки-и-целевую-переменную-обучение-классификатора">Разделение на признаки и целевую переменную, обучение классификатора</h2>
+<div class="sourceCode" id="cb29"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true"></a><span class="im">from</span> sklearn.naive_bayes <span class="im">import</span> CategoricalNB</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true"></a><span class="co"># Разделяем на train/test (80/20)</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true"></a>X <span class="op">=</span> df_bin_large[[<span class="st">&#39;sunny&#39;</span>, <span class="st">&#39;high_humidity&#39;</span>]]</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true"></a>y <span class="op">=</span> df_bin_large[<span class="st">&#39;play&#39;</span>]</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.25</span>, random_state<span class="op">=</span><span class="dv">42</span>, stratify<span class="op">=</span>y</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true"></a>)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true"></a></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true"></a><span class="co"># Обучаем модель</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true"></a>model <span class="op">=</span> CategoricalNB()</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true"></a>model.fit(X_train, y_train)</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true"></a></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true"></a><span class="co"># Предсказания</span></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true"></a>y_pred <span class="op">=</span> model.predict(X_test)</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true"></a></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Модель обучена на&quot;</span>, <span class="bu">len</span>(X_train), <span class="st">&quot;примерах.&quot;</span>)</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Точность на тесте:&quot;</span>, (y_pred <span class="op">==</span> y_test).mean().<span class="bu">round</span>(<span class="dv">4</span>))</span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true"></a></span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true"></a><span class="co"># Отчёт по классификации</span></span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Отчёт по классификации:&quot;</span>)</span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true"></a><span class="bu">print</span>(classification_report(y_test, y_pred, target_names<span class="op">=</span>[<span class="st">&#39;No&#39;</span>, <span class="st">&#39;Yes&#39;</span>]))</span></code></pre></div>
+<pre><code>Модель обучена на 3750 примерах.
+Точность на тесте: 0.7928
+
+Отчёт по классификации:
+              precision    recall  f1-score   support
+
+          No       0.74      0.91      0.81       623
+         Yes       0.88      0.68      0.77       627
+
+    accuracy                           0.79      1250
+   macro avg       0.81      0.79      0.79      1250
+weighted avg       0.81      0.79      0.79      1250</code></pre>
+<h2 id="предсказания-для-всех-4-возможных-комбинаций">Предсказания для всех 4 возможных комбинаций</h2>
+<p>Поскольку у нас 2 бинарных признака, существует всего <strong>4 возможных входа</strong>:</p>
+<table>
+<thead>
+<tr class="header">
+<th>sunny</th>
+<th>humidity</th>
+<th>Ожидаемое решение (интуитивно)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0</td>
+<td>?</td>
+</tr>
+<tr class="even">
+<td>0</td>
+<td>1</td>
+<td>?</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>0</td>
+<td>?</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>1</td>
+<td>?</td>
+</tr>
+</tbody>
+</table>
+<p>Давайте посмотрим, что скажет модель!</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true"></a><span class="co"># Все возможные входы</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true"></a>combinations <span class="op">=</span> np.array([[<span class="dv">0</span>, <span class="dv">0</span>], [<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>], [<span class="dv">1</span>, <span class="dv">1</span>]])</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true"></a>labels <span class="op">=</span> [<span class="st">&#39;Rainy+Low&#39;</span>, <span class="st">&#39;Rainy+High&#39;</span>, <span class="st">&#39;Sunny+Low&#39;</span>, <span class="st">&#39;Sunny+High&#39;</span>]</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true"></a>probas <span class="op">=</span> model.predict_proba(combinations)</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true"></a>preds <span class="op">=</span> model.predict(combinations)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true"></a></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Предсказания модели на всех комбинациях:&quot;</span>)</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Условия        | P(No)  | P(Yes) | Предсказание&quot;</span>)</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;-&quot;</span> <span class="op">*</span> <span class="dv">48</span>)</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true"></a><span class="cf">for</span> label, prob, pred <span class="kw">in</span> <span class="bu">zip</span>(labels, probas, preds):</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true"></a>    p_no, p_yes <span class="op">=</span> prob</span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true"></a>    decision <span class="op">=</span> <span class="st">&quot;Yes&quot;</span> <span class="cf">if</span> pred <span class="op">==</span> <span class="dv">1</span> <span class="cf">else</span> <span class="st">&quot;No&quot;</span></span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true"></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>label<span class="sc">:14}</span><span class="ss"> | </span><span class="sc">{</span>p_no<span class="sc">:.3f}</span><span class="ss">  | </span><span class="sc">{</span>p_yes<span class="sc">:.3f}</span><span class="ss">  | </span><span class="sc">{</span>decision<span class="sc">}</span><span class="ss">&quot;</span>)</span></code></pre></div>
+<pre><code>Предсказания модели на всех комбинациях:
+Условия        | P(No)  | P(Yes) | Предсказание
+------------------------------------------------
+Rainy+Low      | 0.116  | 0.884  | Yes
+Rainy+High     | 0.738  | 0.262  | No
+Sunny+Low      | 0.122  | 0.878  | Yes
+Sunny+High     | 0.749  | 0.251  | No
+
+
+/usr/local/lib/python3.12/dist-packages/sklearn/utils/validation.py:2739: UserWarning: X does not have valid feature names, but CategoricalNB was fitted with feature names
+  warnings.warn(
+/usr/local/lib/python3.12/dist-packages/sklearn/utils/validation.py:2739: UserWarning: X does not have valid feature names, but CategoricalNB was fitted with feature names
+  warnings.warn(</code></pre>
+<h2 id="решение-задач-по-теор.-веру-на-python">Решение задач по теор. веру на Python</h2>
+<h2 id="задание-1">Задание 1</h2>
+<p>В ящике 5 синих и 3 красных шара. Извлекаются <strong>два шара подряд без возвращения</strong>. Найдите вероятность того, что: 1. оба шара синие, 2. хотя бы один из них красный.</p>
+<p><em>Подсказка: можно воспользоваться идеей условной вероятности или перевести задачу в правило произведения, как это было в примере на 9-й лекции.</em></p>
+<p>Запишите краткое решение и вычислите ответ (если есть желание - можете использовать Python в помощь для расчётов).</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true"></a><span class="im">from</span> fractions <span class="im">import</span> Fraction</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true"></a><span class="im">import</span> random</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true"></a><span class="co"># Аналитически (через правило произведения)</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true"></a>p_both_blue <span class="op">=</span> Fraction(<span class="dv">5</span>, <span class="dv">8</span>) <span class="op">*</span> Fraction(<span class="dv">4</span>, <span class="dv">7</span>)           <span class="co"># P(оба синие) = (5/8)*(4/7)</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true"></a>p_at_least_one_red <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> p_both_blue                     <span class="co"># P(хотя бы один красный) = 1 - P(оба синие)</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true"></a></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Аналитически:&quot;</span>)</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;P(оба синие) =&quot;</span>, p_both_blue, <span class="st">&quot;=&quot;</span>, <span class="bu">float</span>(p_both_blue))</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;P(хотя бы один красный) =&quot;</span>, Fraction(p_at_least_one_red).limit_denominator(), <span class="st">&quot;=&quot;</span>, <span class="bu">float</span>(p_at_least_one_red))</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true"></a></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true"></a><span class="kw">def</span> trial():</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true"></a>  urn <span class="op">=</span> [<span class="st">&quot;B&quot;</span>]<span class="op">*</span><span class="dv">5</span> <span class="op">+</span> [<span class="st">&quot;R&quot;</span>]<span class="op">*</span><span class="dv">3</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true"></a>  draw <span class="op">=</span> random.sample(urn, <span class="dv">2</span>)</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true"></a>  <span class="cf">return</span> draw</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true"></a></span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true"></a>both_blue <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true"></a>at_least_red <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true"></a>N <span class="op">=</span> <span class="dv">200_0000</span></span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(N):</span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true"></a>  d <span class="op">=</span> trial()</span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true"></a>  <span class="cf">if</span> d.count(<span class="st">&quot;B&quot;</span>) <span class="op">==</span> <span class="dv">2</span>:</span>
+<span id="cb33-23"><a href="#cb33-23" aria-hidden="true"></a>    both_blue <span class="op">+=</span><span class="dv">1</span></span>
+<span id="cb33-24"><a href="#cb33-24" aria-hidden="true"></a>  <span class="cf">if</span> <span class="st">&quot;R&quot;</span> <span class="kw">in</span> d:</span>
+<span id="cb33-25"><a href="#cb33-25" aria-hidden="true"></a>    at_least_red <span class="op">+=</span><span class="dv">1</span></span>
+<span id="cb33-26"><a href="#cb33-26" aria-hidden="true"></a></span>
+<span id="cb33-27"><a href="#cb33-27" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Оба синие: &quot;</span>, both_blue<span class="op">/</span>N)</span>
+<span id="cb33-28"><a href="#cb33-28" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Хотя бы один красный: &quot;</span>, at_least_red<span class="op">/</span>N)</span></code></pre></div>
+<pre><code>Аналитически:
+P(оба синие) = 5/14 = 0.35714285714285715
+P(хотя бы один красный) = 9/14 = 0.6428571428571429
+Оба синие:  0.3577685
+Хотя бы один красный:  0.6422315</code></pre>
+<h2 id="задание-2">Задание 2</h2>
+<p>У вас есть спам-фильтр. Известно, что:</p>
+<ul>
+<li>20% всех писем — это спам.</li>
+<li>Вероятность того, что в письме встречается слово «скидка», если это спам, — 60%.</li>
+<li>Вероятность того, что в письме встречается слово «скидка», если это не спам, — 10%.</li>
+</ul>
+<p>Какова вероятность того, что письмо — спам, если в нём встречается слово «скидка»?</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true"></a><span class="im">from</span> fractions <span class="im">import</span> Fraction</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true"></a><span class="im">import</span> random</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true"></a><span class="co"># Заданные вероятности</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true"></a>P_S <span class="op">=</span> Fraction(<span class="dv">1</span>, <span class="dv">5</span>)             <span class="co"># P(Spam) = 0.2</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true"></a>P_D_given_S <span class="op">=</span> Fraction(<span class="dv">3</span>, <span class="dv">5</span>)     <span class="co"># P(&quot;скидка&quot;|Spam) = 0.6</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true"></a>P_D_given_notS <span class="op">=</span> Fraction(<span class="dv">1</span>, <span class="dv">10</span>) <span class="co"># P(&quot;скидка&quot;|NotSpam) = 0.1</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true"></a></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true"></a><span class="co"># Байес: P(Spam|&quot;скидка&quot;) = P(&quot;скидка&quot;|Spam) * P(Spam) / P(&quot;скидка&quot;)</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true"></a>P_D <span class="op">=</span> P_D_given_S <span class="op">*</span> P_S <span class="op">+</span> P_D_given_notS <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> P_S)   <span class="co"># полная вероятность слова &quot;скидка&quot;</span></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true"></a>P_S_given_D <span class="op">=</span> (P_D_given_S <span class="op">*</span> P_S) <span class="op">/</span> P_D                 <span class="co"># искомая апостериорная вероятность</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true"></a></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Аналитически:&quot;</span>)</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;P(</span><span class="ch">\&quot;</span><span class="st">скидка</span><span class="ch">\&quot;</span><span class="st">) =&quot;</span>, P_D, <span class="st">&quot;=&quot;</span>, <span class="bu">float</span>(P_D))</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;P(Spam | </span><span class="ch">\&quot;</span><span class="st">скидка</span><span class="ch">\&quot;</span><span class="st">) =&quot;</span>, P_S_given_D, <span class="st">&quot;=&quot;</span>, <span class="bu">float</span>(P_S_given_D))</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true"></a></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true"></a></span></code></pre></div>
+<pre><code>Аналитически:
+P(&quot;скидка&quot;) = 1/5 = 0.2
+P(Spam | &quot;скидка&quot;) = 3/5 = 0.6</code></pre>
+<h2 id="mc-тест">MC Тест</h2>
+<div class="sourceCode" id="cb37"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true"></a><span class="co"># Небольшая проверка Монте‑Карло</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true"></a>N <span class="op">=</span> <span class="dv">200_000</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true"></a>num_with_D <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true"></a>num_spam_and_D <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true"></a></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(N):</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true"></a>    is_spam <span class="op">=</span> random.random() <span class="op">&lt;</span> <span class="bu">float</span>(P_S)                 <span class="co"># с вероятностью 0.2 — спам</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true"></a>    <span class="cf">if</span> is_spam:</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true"></a>        has_D <span class="op">=</span> random.random() <span class="op">&lt;</span> <span class="bu">float</span>(P_D_given_S)       <span class="co"># слово &quot;скидка&quot; при спаме</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true"></a>    <span class="cf">else</span>:</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true"></a>        has_D <span class="op">=</span> random.random() <span class="op">&lt;</span> <span class="bu">float</span>(P_D_given_notS)    <span class="co"># слово &quot;скидка&quot; при не спаме</span></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true"></a></span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true"></a>    <span class="cf">if</span> has_D:</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true"></a>        num_with_D <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true"></a>        <span class="cf">if</span> is_spam:</span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true"></a>            num_spam_and_D <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true"></a></span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true"></a>mc_estimate <span class="op">=</span> num_spam_and_D <span class="op">/</span> num_with_D</span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Монте‑Карло (N = {:,}): P(Spam | </span><span class="ch">\&quot;</span><span class="st">скидка</span><span class="ch">\&quot;</span><span class="st">) ≈ </span><span class="sc">{:.3f}</span><span class="st">&quot;</span>.<span class="bu">format</span>(N, mc_estimate))</span></code></pre></div>
+<pre><code>Монте‑Карло (N = 200,000): P(Spam | &quot;скидка&quot;) ≈ 0.596</code></pre>
+<h2 id="задание-3">Задание 3</h2>
+<p>Среди определенной группы людей вероятность некоторой болезни 0,02. Тест, позволяющий выявить болезнь, несовершенен. На больном он дает позитивный результат в 98 случаях из 100, и, кроме того, он дает позитивный результат в 4 случаях из 100 на здоровом. Найдите вероятность того, что человек, на котором тест дал положительный результат, действительно болен.</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true"></a><span class="im">from</span> fractions <span class="im">import</span> Fraction</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true"></a><span class="im">import</span> random</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true"></a><span class="co"># Данные задачи</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true"></a>p_disease <span class="op">=</span> Fraction(<span class="dv">2</span>, <span class="dv">100</span>)       <span class="co"># распространённость болезни P(D) = 0.02</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true"></a>sens <span class="op">=</span> Fraction(<span class="dv">98</span>, <span class="dv">100</span>)           <span class="co"># чувствительность P(+|D) = 0.98</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true"></a>fpr <span class="op">=</span> Fraction(<span class="dv">4</span>, <span class="dv">100</span>)             <span class="co"># ложноположительная P(+|~D) = 0.04</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true"></a></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true"></a><span class="co"># Полная вероятность положительного теста</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true"></a>p_pos <span class="op">=</span> sens <span class="op">*</span> p_disease <span class="op">+</span> fpr <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> p_disease)</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true"></a></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true"></a><span class="co"># Байес: P(D|+) = P(+|D)P(D) / P(+)</span></span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true"></a>p_d_given_pos <span class="op">=</span> (sens <span class="op">*</span> p_disease) <span class="op">/</span> p_pos</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true"></a></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Ответ:&quot;</span>)</span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;P(+)&quot;</span>, <span class="st">&quot;=&quot;</span>, p_pos, <span class="st">&quot;=&quot;</span>, <span class="bu">float</span>(p_pos))</span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;P(D|+)&quot;</span>, <span class="st">&quot;=&quot;</span>, p_d_given_pos, <span class="st">&quot;=&quot;</span>, <span class="bu">float</span>(p_d_given_pos))</span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true"></a></span></code></pre></div>
+<pre><code>Ответ:
+P(+) = 147/2500 = 0.0588
+P(D|+) = 1/3 = 0.3333333333333333</code></pre>
+<h2 id="mc-тест-1">MC Тест</h2>
+<div class="sourceCode" id="cb41"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true"></a><span class="co"># Небольшая проверка Монте‑Карло</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true"></a>N <span class="op">=</span> <span class="dv">1000_000</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true"></a>pos <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true"></a>true_pos <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(N):</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true"></a>    sick <span class="op">=</span> random.random() <span class="op">&lt;</span> <span class="bu">float</span>(p_disease)   <span class="co"># болен?</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true"></a>    <span class="cf">if</span> sick:</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true"></a>        test_pos <span class="op">=</span> random.random() <span class="op">&lt;</span> <span class="bu">float</span>(sens)</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true"></a>    <span class="cf">else</span>:</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true"></a>        test_pos <span class="op">=</span> random.random() <span class="op">&lt;</span> <span class="bu">float</span>(fpr)</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true"></a>    <span class="cf">if</span> test_pos:</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true"></a>        pos <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true"></a>        <span class="cf">if</span> sick:</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true"></a>            true_pos <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true"></a></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true"></a>mc <span class="op">=</span> true_pos <span class="op">/</span> pos</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">Монте‑Карло (N=</span><span class="sc">{N:,}</span><span class="ss">): P(D|+) ≈ </span><span class="sc">{mc:.5f}</span><span class="ss">&quot;</span>)</span></code></pre></div>
+<pre><code>Монте‑Карло (N=1,000,000): P(D|+) ≈ 0.33575</code></pre>
+<h2 id="задание-4">Задание 4</h2>
+<p>На склад поступило 3 партии изделий: первая – 1500 штук, вторая – 2500 штук, третья – 3000 штук. Средний процент нестандартных изделий в первой партии 10%, во второй – 8%, в третьей – 5%. Наудачу взятое со склада изделие оказалось нестандартным. Найти вероятность того, что оно: * из первой партии; * из второй партии * из третьей партии.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true"></a><span class="im">from</span> fractions <span class="im">import</span> Fraction</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true"></a></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true"></a><span class="co"># Дано</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true"></a>N1, N2, N3 <span class="op">=</span> <span class="dv">1500</span>, <span class="dv">2500</span>, <span class="dv">3000</span>            <span class="co"># размеры партий</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true"></a>p_def_1, p_def_2, p_def_3 <span class="op">=</span> Fraction(<span class="dv">10</span>,<span class="dv">100</span>), Fraction(<span class="dv">8</span>,<span class="dv">100</span>), Fraction(<span class="dv">5</span>,<span class="dv">100</span>)  <span class="co"># доли брака</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true"></a></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true"></a>total <span class="op">=</span> N1 <span class="op">+</span> N2 <span class="op">+</span> N3</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true"></a>P1, P2, P3 <span class="op">=</span> Fraction(N1, total), Fraction(N2, total), Fraction(N3, total)      <span class="co"># априорные вероятности партии</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true"></a></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true"></a><span class="co"># Полная вероятность обнаружить брак</span></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true"></a>p_def <span class="op">=</span> P1<span class="op">*</span>p_def_1 <span class="op">+</span> P2<span class="op">*</span>p_def_2 <span class="op">+</span> P3<span class="op">*</span>p_def_3</span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true"></a></span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true"></a><span class="co"># Байес: постериоры</span></span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true"></a>post1 <span class="op">=</span> P1<span class="op">*</span>p_def_1 <span class="op">/</span> p_def</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true"></a>post2 <span class="op">=</span> P2<span class="op">*</span>p_def_2 <span class="op">/</span> p_def</span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true"></a>post3 <span class="op">=</span> P3<span class="op">*</span>p_def_3 <span class="op">/</span> p_def</span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true"></a></span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;P(брак) =&quot;</span>, p_def, <span class="st">&quot;=&quot;</span>, <span class="bu">float</span>(p_def))</span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;P(партия 1 | брак) =&quot;</span>, post1, <span class="st">&quot;=&quot;</span>, <span class="bu">float</span>(post1))</span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;P(партия 2 | брак) =&quot;</span>, post2, <span class="st">&quot;=&quot;</span>, <span class="bu">float</span>(post2))</span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;P(партия 3 | брак) =&quot;</span>, post3, <span class="st">&quot;=&quot;</span>, <span class="bu">float</span>(post3))</span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true"></a></span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Проверка: сумма постериоров =&quot;</span>, <span class="bu">float</span>(post1 <span class="op">+</span> post2 <span class="op">+</span> post3))</span></code></pre></div>
+<pre><code>P(брак) = 1/14 = 0.07142857142857142
+P(партия 1 | брак) = 3/10 = 0.3
+P(партия 2 | брак) = 2/5 = 0.4
+P(партия 3 | брак) = 3/10 = 0.3
+
+Проверка: сумма постериоров = 1.0</code></pre>
+<h2 id="обход-графов-тремя-алгоритмами">Обход графов тремя алгоритмами</h2>
+<p>Цель: рассмотреит работу трёх классических алгоритмов в python реализации</p>
+<h2 id="алгоритм-bfs">Алгоритм BFS</h2>
+<div class="sourceCode" id="cb45"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true"></a><span class="im">import</span> heapq  <span class="co"># Для приоритетной очереди</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true"></a><span class="im">from</span> collections <span class="im">import</span> deque</span></code></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true"></a><span class="co"># Поиск в ширину</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true"></a></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true"></a><span class="kw">def</span> bfs(graph, start_vertex):</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true"></a>    <span class="co">&quot;&quot;&quot;</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true"></a><span class="co">    Реализация поиска в ширину (Breadth-First Search).</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true"></a></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true"></a><span class="co">    Аргументы:</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true"></a><span class="co">    graph -- граф, представленный в виде словаря: {вершина: список соседей}</span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true"></a><span class="co">    start_vertex -- стартовая вершина для обхода</span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true"></a></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true"></a><span class="co">    Возвращает:</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true"></a><span class="co">    levels -- словарь, где каждой вершине сопоставлен её уровень (расстояние в ребрах от стартовой)</span></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true"></a><span class="co">    parents -- словарь, где каждой вершине сопоставлен её родитель в дереве обхода</span></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true"></a><span class="co">    &quot;&quot;&quot;</span></span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true"></a>    visited <span class="op">=</span> <span class="bu">set</span>()  <span class="co"># Множество посещённых вершин</span></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true"></a>    queue <span class="op">=</span> deque([start_vertex])  <span class="co"># Очередь вершин на обработку, инициализирована стартовой вершиной</span></span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true"></a>    levels <span class="op">=</span> {start_vertex: <span class="dv">0</span>}  <span class="co"># Уровень стартовой вершины — 0</span></span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true"></a>    parents <span class="op">=</span> {start_vertex: <span class="va">None</span>}  <span class="co"># У стартовой вершины нет родителя</span></span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true"></a></span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true"></a>    <span class="cf">while</span> queue:</span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true"></a>        vertex <span class="op">=</span> queue.popleft()  <span class="co"># Извлекаем вершину из начала очереди</span></span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true"></a>        visited.add(vertex)  <span class="co"># Помечаем как посещённую</span></span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true"></a></span>
+<span id="cb46-24"><a href="#cb46-24" aria-hidden="true"></a>        <span class="co"># Обходим всех соседей текущей вершины</span></span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true"></a>        <span class="cf">for</span> neighbor <span class="kw">in</span> graph[vertex]:</span>
+<span id="cb46-26"><a href="#cb46-26" aria-hidden="true"></a>            <span class="cf">if</span> neighbor <span class="kw">not</span> <span class="kw">in</span> visited:</span>
+<span id="cb46-27"><a href="#cb46-27" aria-hidden="true"></a>                visited.add(neighbor)  <span class="co"># Помечаем соседа как посещённого</span></span>
+<span id="cb46-28"><a href="#cb46-28" aria-hidden="true"></a>                queue.append(neighbor)  <span class="co"># Добавляем его в очередь для дальнейшего обхода</span></span>
+<span id="cb46-29"><a href="#cb46-29" aria-hidden="true"></a>                levels[neighbor] <span class="op">=</span> levels[vertex] <span class="op">+</span> <span class="dv">1</span>  <span class="co"># Уровень соседа на 1 больше уровня текущей вершины</span></span>
+<span id="cb46-30"><a href="#cb46-30" aria-hidden="true"></a>                parents[neighbor] <span class="op">=</span> vertex  <span class="co"># Устанавливаем текущую вершину как родителя для соседа</span></span>
+<span id="cb46-31"><a href="#cb46-31" aria-hidden="true"></a></span>
+<span id="cb46-32"><a href="#cb46-32" aria-hidden="true"></a>    <span class="cf">return</span> levels, parents</span></code></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true"></a><span class="im">import</span> networkx <span class="im">as</span> nx</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true"></a></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true"></a>adj_list <span class="op">=</span> {</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true"></a>    <span class="st">&#39;A&#39;</span>: [<span class="st">&#39;C&#39;</span>, <span class="st">&#39;B&#39;</span>, <span class="st">&#39;K&#39;</span>],   <span class="co"># A связана с C, B, K</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true"></a>    <span class="st">&#39;C&#39;</span>: [<span class="st">&#39;A&#39;</span>, <span class="st">&#39;B&#39;</span>, <span class="st">&#39;D&#39;</span>],   <span class="co"># C связана с A, B, D</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true"></a>    <span class="st">&#39;B&#39;</span>: [<span class="st">&#39;A&#39;</span>, <span class="st">&#39;C&#39;</span>, <span class="st">&#39;K&#39;</span>],   <span class="co"># B связана с A, C, K</span></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true"></a>    <span class="st">&#39;K&#39;</span>: [<span class="st">&#39;A&#39;</span>, <span class="st">&#39;B&#39;</span>, <span class="st">&#39;F&#39;</span>],   <span class="co"># K связана с A, B, F</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true"></a>    <span class="st">&#39;F&#39;</span>: [<span class="st">&#39;K&#39;</span>, <span class="st">&#39;D&#39;</span>],        <span class="co"># F связана с K, D</span></span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true"></a>    <span class="st">&#39;D&#39;</span>: [<span class="st">&#39;C&#39;</span>, <span class="st">&#39;F&#39;</span>]         <span class="co"># D связана с C, F</span></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true"></a>}</span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true"></a></span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true"></a><span class="co"># Создаём граф</span></span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true"></a>G <span class="op">=</span> nx.Graph()</span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true"></a></span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true"></a><span class="co"># Добавляем рёбра из adj_list</span></span>
+<span id="cb47-17"><a href="#cb47-17" aria-hidden="true"></a><span class="cf">for</span> node, neighbors <span class="kw">in</span> adj_list.items():</span>
+<span id="cb47-18"><a href="#cb47-18" aria-hidden="true"></a>    <span class="cf">for</span> neighbor <span class="kw">in</span> neighbors:</span>
+<span id="cb47-19"><a href="#cb47-19" aria-hidden="true"></a>        G.add_edge(node, neighbor)</span>
+<span id="cb47-20"><a href="#cb47-20" aria-hidden="true"></a></span>
+<span id="cb47-21"><a href="#cb47-21" aria-hidden="true"></a><span class="co"># Рисуем граф</span></span>
+<span id="cb47-22"><a href="#cb47-22" aria-hidden="true"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>))</span>
+<span id="cb47-23"><a href="#cb47-23" aria-hidden="true"></a>pos <span class="op">=</span> nx.spring_layout(G, seed<span class="op">=</span><span class="dv">42</span>)  <span class="co"># Чтобы граф каждый раз был одинаковым</span></span>
+<span id="cb47-24"><a href="#cb47-24" aria-hidden="true"></a>nx.draw(G, pos, with_labels<span class="op">=</span><span class="va">True</span>, node_color<span class="op">=</span><span class="st">&#39;lightblue&#39;</span>, node_size<span class="op">=</span><span class="dv">1500</span>, edge_color<span class="op">=</span><span class="st">&#39;gray&#39;</span>, font_size<span class="op">=</span><span class="dv">12</span>, font_weight<span class="op">=</span><span class="st">&#39;bold&#39;</span>)</span>
+<span id="cb47-25"><a href="#cb47-25" aria-hidden="true"></a>plt.title(<span class="st">&quot;Граф из списка смежности&quot;</span>)</span>
+<span id="cb47-26"><a href="#cb47-26" aria-hidden="true"></a>plt.show()</span>
+<span id="cb47-27"><a href="#cb47-27" aria-hidden="true"></a></span>
+<span id="cb47-28"><a href="#cb47-28" aria-hidden="true"></a>levels, parents <span class="op">=</span> bfs(adj_list, <span class="st">&#39;A&#39;</span>)</span>
+<span id="cb47-29"><a href="#cb47-29" aria-hidden="true"></a><span class="bu">print</span>(levels)</span>
+<span id="cb47-30"><a href="#cb47-30" aria-hidden="true"></a><span class="bu">print</span>(parents)</span></code></pre></div>
+<figure>
+<img src="https://theonlineconverter.com/uploads/___1758989175_files/___1758989175_47_0.png" alt="" /><figcaption>png</figcaption>
+</figure>
+<pre><code>{&#39;A&#39;: 0, &#39;C&#39;: 1, &#39;B&#39;: 1, &#39;K&#39;: 1, &#39;D&#39;: 2, &#39;F&#39;: 2}
+{&#39;A&#39;: None, &#39;C&#39;: &#39;A&#39;, &#39;B&#39;: &#39;A&#39;, &#39;K&#39;: &#39;A&#39;, &#39;D&#39;: &#39;C&#39;, &#39;F&#39;: &#39;K&#39;}</code></pre>
+<h2 id="поиск-в-глубину">Поиск в глубину</h2>
+<div class="sourceCode" id="cb49"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true"></a><span class="co"># Определяем граф</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true"></a>adj_list <span class="op">=</span> {</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true"></a>    <span class="st">&#39;A&#39;</span>: [<span class="st">&#39;B&#39;</span>, <span class="st">&#39;C&#39;</span>, <span class="st">&#39;K&#39;</span>],</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true"></a>    <span class="st">&#39;B&#39;</span>: [<span class="st">&#39;A&#39;</span>, <span class="st">&#39;C&#39;</span>, <span class="st">&#39;K&#39;</span>],</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true"></a>    <span class="st">&#39;C&#39;</span>: [<span class="st">&#39;A&#39;</span>, <span class="st">&#39;B&#39;</span>, <span class="st">&#39;D&#39;</span>, <span class="st">&#39;F&#39;</span>],</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true"></a>    <span class="st">&#39;D&#39;</span>: [<span class="st">&#39;C&#39;</span>, <span class="st">&#39;F&#39;</span>],</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true"></a>    <span class="st">&#39;F&#39;</span>: [<span class="st">&#39;K&#39;</span>, <span class="st">&#39;D&#39;</span>],</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true"></a>    <span class="st">&#39;K&#39;</span>: [<span class="st">&#39;A&#39;</span>, <span class="st">&#39;B&#39;</span>, <span class="st">&#39;F&#39;</span>]</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true"></a>}</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true"></a></span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true"></a><span class="co"># Визуализация графа</span></span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>))</span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true"></a>G <span class="op">=</span> nx.Graph()</span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true"></a><span class="cf">for</span> node, neighbors <span class="kw">in</span> adj_list.items():</span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true"></a>    <span class="cf">for</span> neighbor <span class="kw">in</span> neighbors:</span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true"></a>        G.add_edge(node, neighbor)</span>
+<span id="cb49-17"><a href="#cb49-17" aria-hidden="true"></a></span>
+<span id="cb49-18"><a href="#cb49-18" aria-hidden="true"></a>pos <span class="op">=</span> nx.spring_layout(G, seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb49-19"><a href="#cb49-19" aria-hidden="true"></a>nx.draw(G, pos, with_labels<span class="op">=</span><span class="va">True</span>, node_color<span class="op">=</span><span class="st">&#39;lightcoral&#39;</span>, node_size<span class="op">=</span><span class="dv">1500</span>,</span>
+<span id="cb49-20"><a href="#cb49-20" aria-hidden="true"></a>        edge_color<span class="op">=</span><span class="st">&#39;gray&#39;</span>, font_size<span class="op">=</span><span class="dv">12</span>, font_weight<span class="op">=</span><span class="st">&#39;bold&#39;</span>)</span>
+<span id="cb49-21"><a href="#cb49-21" aria-hidden="true"></a>plt.title(<span class="st">&quot;Граф для поиска в глубину (DFS)&quot;</span>)</span>
+<span id="cb49-22"><a href="#cb49-22" aria-hidden="true"></a>plt.show()</span>
+<span id="cb49-23"><a href="#cb49-23" aria-hidden="true"></a></span>
+<span id="cb49-24"><a href="#cb49-24" aria-hidden="true"></a><span class="co"># Реализация DFS (включена прямо в ячейку для автономности)</span></span>
+<span id="cb49-25"><a href="#cb49-25" aria-hidden="true"></a><span class="kw">def</span> dfs(visited, graph, node, path, parents):</span>
+<span id="cb49-26"><a href="#cb49-26" aria-hidden="true"></a>    <span class="co">&quot;&quot;&quot;</span></span>
+<span id="cb49-27"><a href="#cb49-27" aria-hidden="true"></a><span class="co">    Рекурсивная реализация поиска в глубину (Depth-First Search).</span></span>
+<span id="cb49-28"><a href="#cb49-28" aria-hidden="true"></a><span class="co">    &quot;&quot;&quot;</span></span>
+<span id="cb49-29"><a href="#cb49-29" aria-hidden="true"></a>    <span class="cf">if</span> node <span class="kw">not</span> <span class="kw">in</span> visited:</span>
+<span id="cb49-30"><a href="#cb49-30" aria-hidden="true"></a>        visited.add(node)</span>
+<span id="cb49-31"><a href="#cb49-31" aria-hidden="true"></a>        path.append(node)</span>
+<span id="cb49-32"><a href="#cb49-32" aria-hidden="true"></a>        <span class="cf">for</span> neighbor <span class="kw">in</span> graph[node]:</span>
+<span id="cb49-33"><a href="#cb49-33" aria-hidden="true"></a>            <span class="cf">if</span> neighbor <span class="kw">not</span> <span class="kw">in</span> visited:</span>
+<span id="cb49-34"><a href="#cb49-34" aria-hidden="true"></a>                parents[neighbor] <span class="op">=</span> node</span>
+<span id="cb49-35"><a href="#cb49-35" aria-hidden="true"></a>                dfs(visited, graph, neighbor, path, parents)</span>
+<span id="cb49-36"><a href="#cb49-36" aria-hidden="true"></a></span>
+<span id="cb49-37"><a href="#cb49-37" aria-hidden="true"></a><span class="co"># Запуск DFS</span></span>
+<span id="cb49-38"><a href="#cb49-38" aria-hidden="true"></a>visited <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb49-39"><a href="#cb49-39" aria-hidden="true"></a>parents <span class="op">=</span> {<span class="st">&#39;A&#39;</span>: <span class="va">None</span>}</span>
+<span id="cb49-40"><a href="#cb49-40" aria-hidden="true"></a>path <span class="op">=</span> []</span>
+<span id="cb49-41"><a href="#cb49-41" aria-hidden="true"></a>dfs(visited, adj_list, <span class="st">&#39;A&#39;</span>, path, parents)</span>
+<span id="cb49-42"><a href="#cb49-42" aria-hidden="true"></a></span>
+<span id="cb49-43"><a href="#cb49-43" aria-hidden="true"></a><span class="co"># Вывод результатов</span></span>
+<span id="cb49-44"><a href="#cb49-44" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Итоговый путь:&quot;</span>, path)</span>
+<span id="cb49-45"><a href="#cb49-45" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Родители:&quot;</span>, parents)</span>
+<span id="cb49-46"><a href="#cb49-46" aria-hidden="true"></a></span></code></pre></div>
+<figure>
+<img src="https://theonlineconverter.com/uploads/___1758989175_files/___1758989175_49_0.png" alt="" /><figcaption>png</figcaption>
+</figure>
+<pre><code>Итоговый путь: [&#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;F&#39;, &#39;K&#39;]
+Родители: {&#39;A&#39;: None, &#39;B&#39;: &#39;A&#39;, &#39;C&#39;: &#39;B&#39;, &#39;D&#39;: &#39;C&#39;, &#39;F&#39;: &#39;D&#39;, &#39;K&#39;: &#39;F&#39;}</code></pre>
+<h2 id="дейкстра">Дейкстра</h2>
+<div class="sourceCode" id="cb51"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true"></a><span class="kw">def</span> dijkstra(graph, start_vertex):</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true"></a>    <span class="co">&quot;&quot;&quot;</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true"></a><span class="co">    Реализация алгоритма Дейкстры для взвешенного графа.</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true"></a></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true"></a><span class="co">    Аргументы:</span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true"></a><span class="co">    graph -- словарь словарей: {вершина: {сосед: вес ребра}}</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true"></a><span class="co">    start_vertex -- начальная вершина</span></span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true"></a></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true"></a><span class="co">    Возвращает:</span></span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true"></a><span class="co">    distances -- словарь кратчайших расстояний от start_vertex до всех остальных</span></span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true"></a><span class="co">    parents -- словарь родителей, позволяющий восстановить путь</span></span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true"></a><span class="co">    &quot;&quot;&quot;</span></span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true"></a>    <span class="co"># Инициализация расстояний: бесконечность, кроме стартовой вершины</span></span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true"></a>    distances <span class="op">=</span> {vertex: <span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>) <span class="cf">for</span> vertex <span class="kw">in</span> graph}</span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true"></a>    distances[start_vertex] <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true"></a></span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true"></a>    <span class="co"># Родители для восстановления пути</span></span>
+<span id="cb51-18"><a href="#cb51-18" aria-hidden="true"></a>    parents <span class="op">=</span> {start_vertex: <span class="va">None</span>}</span>
+<span id="cb51-19"><a href="#cb51-19" aria-hidden="true"></a></span>
+<span id="cb51-20"><a href="#cb51-20" aria-hidden="true"></a>    <span class="co"># Приоритетная очередь: (текущее расстояние, вершина)</span></span>
+<span id="cb51-21"><a href="#cb51-21" aria-hidden="true"></a>    priority_queue <span class="op">=</span> [(<span class="dv">0</span>, start_vertex)]</span>
+<span id="cb51-22"><a href="#cb51-22" aria-hidden="true"></a></span>
+<span id="cb51-23"><a href="#cb51-23" aria-hidden="true"></a>    <span class="cf">while</span> priority_queue:</span>
+<span id="cb51-24"><a href="#cb51-24" aria-hidden="true"></a>        current_distance, current_vertex <span class="op">=</span> heapq.heappop(priority_queue)</span>
+<span id="cb51-25"><a href="#cb51-25" aria-hidden="true"></a></span>
+<span id="cb51-26"><a href="#cb51-26" aria-hidden="true"></a>        <span class="co"># Если текущая вершина уже обойдена на более короткое расстояние, пропускаем</span></span>
+<span id="cb51-27"><a href="#cb51-27" aria-hidden="true"></a>        <span class="cf">if</span> current_distance <span class="op">&gt;</span> distances[current_vertex]:</span>
+<span id="cb51-28"><a href="#cb51-28" aria-hidden="true"></a>            <span class="cf">continue</span></span>
+<span id="cb51-29"><a href="#cb51-29" aria-hidden="true"></a></span>
+<span id="cb51-30"><a href="#cb51-30" aria-hidden="true"></a>        <span class="co"># Проверяем всех соседей текущей вершины</span></span>
+<span id="cb51-31"><a href="#cb51-31" aria-hidden="true"></a>        <span class="cf">for</span> neighbor, weight <span class="kw">in</span> graph[current_vertex].items():</span>
+<span id="cb51-32"><a href="#cb51-32" aria-hidden="true"></a>            distance <span class="op">=</span> current_distance <span class="op">+</span> weight  <span class="co"># Обновлённое расстояние до соседа</span></span>
+<span id="cb51-33"><a href="#cb51-33" aria-hidden="true"></a></span>
+<span id="cb51-34"><a href="#cb51-34" aria-hidden="true"></a>            <span class="co"># Если найден более короткий путь до соседа — обновляем</span></span>
+<span id="cb51-35"><a href="#cb51-35" aria-hidden="true"></a>            <span class="cf">if</span> distance <span class="op">&lt;</span> distances[neighbor]:</span>
+<span id="cb51-36"><a href="#cb51-36" aria-hidden="true"></a>                distances[neighbor] <span class="op">=</span> distance</span>
+<span id="cb51-37"><a href="#cb51-37" aria-hidden="true"></a>                parents[neighbor] <span class="op">=</span> current_vertex</span>
+<span id="cb51-38"><a href="#cb51-38" aria-hidden="true"></a>                heapq.heappush(priority_queue, (distance, neighbor))  <span class="co"># Добавляем в очередь</span></span>
+<span id="cb51-39"><a href="#cb51-39" aria-hidden="true"></a></span>
+<span id="cb51-40"><a href="#cb51-40" aria-hidden="true"></a>    <span class="cf">return</span> distances, parents</span></code></pre></div>
+<div class="sourceCode" id="cb52"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true"></a><span class="co"># Определение взвешенного графа</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true"></a>weighted_graph <span class="op">=</span> {</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true"></a>    <span class="st">&#39;A&#39;</span>: {<span class="st">&#39;C&#39;</span>: <span class="dv">1</span>, <span class="st">&#39;B&#39;</span>: <span class="dv">4</span>, <span class="st">&#39;K&#39;</span>: <span class="dv">7</span>},</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true"></a>    <span class="st">&#39;C&#39;</span>: {<span class="st">&#39;A&#39;</span>: <span class="dv">1</span>, <span class="st">&#39;B&#39;</span>: <span class="dv">2</span>, <span class="st">&#39;D&#39;</span>: <span class="dv">5</span>},</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true"></a>    <span class="st">&#39;B&#39;</span>: {<span class="st">&#39;A&#39;</span>: <span class="dv">4</span>, <span class="st">&#39;C&#39;</span>: <span class="dv">2</span>, <span class="st">&#39;K&#39;</span>: <span class="dv">1</span>},</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true"></a>    <span class="st">&#39;K&#39;</span>: {<span class="st">&#39;A&#39;</span>: <span class="dv">7</span>, <span class="st">&#39;B&#39;</span>: <span class="dv">1</span>, <span class="st">&#39;F&#39;</span>: <span class="dv">3</span>},</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true"></a>    <span class="st">&#39;F&#39;</span>: {<span class="st">&#39;K&#39;</span>: <span class="dv">3</span>, <span class="st">&#39;D&#39;</span>: <span class="dv">1</span>},</span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true"></a>    <span class="st">&#39;D&#39;</span>: {<span class="st">&#39;C&#39;</span>: <span class="dv">5</span>, <span class="st">&#39;F&#39;</span>: <span class="dv">1</span>}</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true"></a>}</span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true"></a></span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true"></a><span class="co"># Визуализация взвешенного графа</span></span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">6</span>))</span>
+<span id="cb52-13"><a href="#cb52-13" aria-hidden="true"></a>G <span class="op">=</span> nx.Graph()</span>
+<span id="cb52-14"><a href="#cb52-14" aria-hidden="true"></a></span>
+<span id="cb52-15"><a href="#cb52-15" aria-hidden="true"></a><span class="co"># Добавляем рёбра с весами</span></span>
+<span id="cb52-16"><a href="#cb52-16" aria-hidden="true"></a><span class="cf">for</span> node, neighbors <span class="kw">in</span> weighted_graph.items():</span>
+<span id="cb52-17"><a href="#cb52-17" aria-hidden="true"></a>    <span class="cf">for</span> neighbor, weight <span class="kw">in</span> neighbors.items():</span>
+<span id="cb52-18"><a href="#cb52-18" aria-hidden="true"></a>        G.add_edge(node, neighbor, weight<span class="op">=</span>weight)</span>
+<span id="cb52-19"><a href="#cb52-19" aria-hidden="true"></a></span>
+<span id="cb52-20"><a href="#cb52-20" aria-hidden="true"></a>pos <span class="op">=</span> nx.spring_layout(G, seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb52-21"><a href="#cb52-21" aria-hidden="true"></a>edge_labels <span class="op">=</span> nx.get_edge_attributes(G, <span class="st">&#39;weight&#39;</span>)</span>
+<span id="cb52-22"><a href="#cb52-22" aria-hidden="true"></a></span>
+<span id="cb52-23"><a href="#cb52-23" aria-hidden="true"></a>nx.draw(G, pos, with_labels<span class="op">=</span><span class="va">True</span>, node_color<span class="op">=</span><span class="st">&#39;lightblue&#39;</span>, node_size<span class="op">=</span><span class="dv">1500</span>,</span>
+<span id="cb52-24"><a href="#cb52-24" aria-hidden="true"></a>        edge_color<span class="op">=</span><span class="st">&#39;gray&#39;</span>, font_size<span class="op">=</span><span class="dv">12</span>, font_weight<span class="op">=</span><span class="st">&#39;bold&#39;</span>)</span>
+<span id="cb52-25"><a href="#cb52-25" aria-hidden="true"></a>nx.draw_networkx_edge_labels(G, pos, edge_labels<span class="op">=</span>edge_labels, font_color<span class="op">=</span><span class="st">&#39;red&#39;</span>)</span>
+<span id="cb52-26"><a href="#cb52-26" aria-hidden="true"></a>plt.title(<span class="st">&quot;Взвешенный граф для алгоритма Дейкстры&quot;</span>)</span>
+<span id="cb52-27"><a href="#cb52-27" aria-hidden="true"></a>plt.show()</span>
+<span id="cb52-28"><a href="#cb52-28" aria-hidden="true"></a></span>
+<span id="cb52-29"><a href="#cb52-29" aria-hidden="true"></a><span class="co"># Запуск алгоритма</span></span>
+<span id="cb52-30"><a href="#cb52-30" aria-hidden="true"></a>distances, parents <span class="op">=</span> dijkstra(weighted_graph, <span class="st">&#39;A&#39;</span>)</span>
+<span id="cb52-31"><a href="#cb52-31" aria-hidden="true"></a></span>
+<span id="cb52-32"><a href="#cb52-32" aria-hidden="true"></a><span class="co"># Вывод результатов</span></span>
+<span id="cb52-33"><a href="#cb52-33" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Кратчайшие расстояния:&quot;</span>, distances)</span>
+<span id="cb52-34"><a href="#cb52-34" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Родители для восстановления путей:&quot;</span>, parents)</span>
+<span id="cb52-35"><a href="#cb52-35" aria-hidden="true"></a></span></code></pre></div>
+<figure>
+<img src="https://theonlineconverter.com/uploads/___1758989175_files/___1758989175_52_0.png" alt="" /><figcaption>png</figcaption>
+</figure>
+<pre><code>Кратчайшие расстояния: {&#39;A&#39;: 0, &#39;C&#39;: 1, &#39;B&#39;: 3, &#39;K&#39;: 4, &#39;F&#39;: 7, &#39;D&#39;: 6}
+Родители для восстановления путей: {&#39;A&#39;: None, &#39;C&#39;: &#39;A&#39;, &#39;B&#39;: &#39;C&#39;, &#39;K&#39;: &#39;B&#39;, &#39;D&#39;: &#39;C&#39;, &#39;F&#39;: &#39;K&#39;}</code></pre>
