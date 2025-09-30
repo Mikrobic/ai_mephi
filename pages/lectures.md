@@ -24,7 +24,10 @@ description: "Описание страницы Subpage"
 
 <span class="lesson-title">«Графы»</span><br>
 
-⑤ 📐 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%205">Лекция  (22.09.2025)  </a></strong><br><br>
+⑤ 📐 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%205">Лекция  (22.09.2025)  </a></strong><br>
+
+⑥ 🎯 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%206">Семинар  (26.09.2025)  </a></strong><br><br>
+
 
 
 <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
