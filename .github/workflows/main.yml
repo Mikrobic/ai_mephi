@@ -8,20 +8,34 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Check commit message for "Лекция"
+      - name: Check commit message for keywords
         id: check-commit
         run: |
           COMMIT_MSG="${{ github.event.head_commit.message }}"
+          LECTURE_FOUND=false
+          MATERIAL_FOUND=false
+          
           if echo "$COMMIT_MSG" | grep -qi "Лекция"; then
-            echo "lecture_found=true" >> $GITHUB_OUTPUT
+            LECTURE_FOUND=true
             echo "📚 Найдено слово 'Лекция' в коммите"
+          fi
+          
+          if echo "$COMMIT_MSG" | grep -qi "материал"; then
+            MATERIAL_FOUND=true
+            echo "📄 Найдено слово 'материал' в коммите"
+          fi
+          
+          if [ "$LECTURE_FOUND" = true ]; then
+            echo "notification_type=lecture" >> $GITHUB_OUTPUT
+          elif [ "$MATERIAL_FOUND" = true ]; then
+            echo "notification_type=material" >> $GITHUB_OUTPUT
           else
-            echo "lecture_found=false" >> $GITHUB_OUTPUT
-            echo "❌ Слово 'Лекция' не найдено в коммите"
+            echo "notification_type=none" >> $GITHUB_OUTPUT
+            echo "❌ Ключевые слова не найдены в коммите"
           fi
 
-      - name: Send Telegram notification
-        if: steps.check-commit.outputs.lecture_found == 'true'
+      - name: Send Telegram notification for lecture
+        if: steps.check-commit.outputs.notification_type == 'lecture'
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_SUPERGROUP_CHAT_ID }}
@@ -36,3 +50,20 @@ jobs:
             🔗 Ссылка: ${{ github.event.head_commit.url }}
             
             #лекция #обновление
+
+      - name: Send Telegram notification for material
+        if: steps.check-commit.outputs.notification_type == 'material'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_SUPERGROUP_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            📄 Добавлен новый материал!
+            
+            📦 Репозиторий: ${{ github.repository }}
+            🌿 Ветка: ${{ github.ref }}
+            👤 Автор: ${{ github.actor }}
+            💬 Коммит: ${{ github.event.head_commit.message }}
+            🔗 Ссылка: ${{ github.event.head_commit.url }}
+            
+            #материал #обновление
