@@ -41,7 +41,7 @@ jobs:
           -H "Content-Type: application/json" \
           -d '{
             "chat_id": "${{ secrets.TELEGRAM_SUPERGROUP_CHAT_ID }}",
-            "message_thread_id": 58,
+            "message_thread_id": "${{ secrets.THREAD_ID }}",
             "text": "📚 Новая лекция загружена!\n\n📦 Репозиторий: ${{ github.repository }}\n💬 Коммит: ${{ github.event.head_commit.message }}\n🔗 Ссылка: https://mikrobic.github.io/ai_mephi/lectures/\n\n#лекция #обновление",
             "parse_mode": "HTML"
           }'
@@ -53,7 +53,7 @@ jobs:
           -H "Content-Type: application/json" \
           -d '{
             "chat_id": "${{ secrets.TELEGRAM_SUPERGROUP_CHAT_ID }}",
-            "message_thread_id": 58,
+            "message_thread_id": "${{ secrets.THREAD_ID }}",
             "text": "📄 Добавлен новый материал!\n\n📦 Репозиторий: ${{ github.repository }}\n🌿 Ветка: ${{ github.ref }}\n👤 Автор: ${{ github.actor }}\n💬 Коммит: ${{ github.event.head_commit.message }}\n🔗 Ссылка: ${{ github.event.head_commit.url }}\n\n#материал #обновление",
             "parse_mode": "HTML"
           }'
