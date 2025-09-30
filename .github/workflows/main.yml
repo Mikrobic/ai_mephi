@@ -1,0 +1,25 @@
+name: Telegram Supergroup CI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send to Supergroup
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_SUPERGROUP_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            🚀 New Deployment to Supergroup
+            📦 Project: ${{ github.repository }}
+            🌿 Branch: ${{ github.ref }}
+            👤 Author: ${{ github.actor }}
+            💬 Commit: ${{ github.event.head_commit.message }}
+            
+            ✅ Supergroup chat works!
+            
+            #ci #deployment
