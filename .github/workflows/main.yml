@@ -36,34 +36,24 @@ jobs:
 
       - name: Send Telegram notification for lecture
         if: steps.check-commit.outputs.notification_type == 'lecture'
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_SUPERGROUP_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          thread_id: 58
-          message: |
-            📚 Новая лекция загружена!
-            
-            📦 Репозиторий: ${{ github.repository }}
-            💬 Коммит: ${{ github.event.head_commit.message }}
-            🔗 Ссылка: https://mikrobic.github.io/ai_mephi/lectures/
-            
-            #лекция #обновление
+        run: |
+          curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "chat_id": "${{ secrets.TELEGRAM_SUPERGROUP_CHAT_ID }}",
+            "message_thread_id": 58,
+            "text": "📚 Новая лекция загружена!\n\n📦 Репозиторий: ${{ github.repository }}\n💬 Коммит: ${{ github.event.head_commit.message }}\n🔗 Ссылка: https://mikrobic.github.io/ai_mephi/lectures/\n\n#лекция #обновление",
+            "parse_mode": "HTML"
+          }'
 
       - name: Send Telegram notification for material
         if: steps.check-commit.outputs.notification_type == 'material'
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_SUPERGROUP_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          thread_id: 58
-          message: |
-            📄 Добавлен новый материал!
-            
-            📦 Репозиторий: ${{ github.repository }}
-            🌿 Ветка: ${{ github.ref }}
-            👤 Автор: ${{ github.actor }}
-            💬 Коммит: ${{ github.event.head_commit.message }}
-            🔗 Ссылка: ${{ github.event.head_commit.url }}
-            
-            #материал #обновление
+        run: |
+          curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "chat_id": "${{ secrets.TELEGRAM_SUPERGROUP_CHAT_ID }}",
+            "message_thread_id": 58,
+            "text": "📄 Добавлен новый материал!\n\n📦 Репозиторий: ${{ github.repository }}\n🌿 Ветка: ${{ github.ref }}\n👤 Автор: ${{ github.actor }}\n💬 Коммит: ${{ github.event.head_commit.message }}\n🔗 Ссылка: ${{ github.event.head_commit.url }}\n\n#материал #обновление",
+            "parse_mode": "HTML"
+          }'
