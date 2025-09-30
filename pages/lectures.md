@@ -56,9 +56,6 @@ description: "Описание страницы Subpage"
 <span class="lesson-title">«Функции как полноправные объекты»</span><br>
 ⑧ 🧮 <strong><a href="https://disk.yandex.ru/d/B5kQ9LLERZ028Q">Лекция (24.09.2025)  </a></strong><br><br>
 
-<span class="lesson-title">«Функции как полноправные объекты»</span><br>
-⑨ 🧮 <strong><a href="https://disk.yandex.ru/d/B5kQ9LLERZ028Q">Лекция (24.09.2025)  </a></strong><br><br>
-
 <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
 
 <strong>Базы данных и язык SQL</strong><br><br>
