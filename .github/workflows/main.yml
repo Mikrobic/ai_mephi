@@ -40,7 +40,7 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_SUPERGROUP_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          thread_id: ${{ secrets.THREAD_ID }}
+          thread_id: 58
           message: |
             📚 Новая лекция загружена!
             
@@ -56,7 +56,7 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_SUPERGROUP_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          thread_id: ${{ secrets.THREAD_ID }}
+          thread_id: 58
           message: |
             📄 Добавлен новый материал!
             
