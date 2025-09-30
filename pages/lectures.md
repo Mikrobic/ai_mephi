@@ -64,6 +64,6 @@ description: "Описание страницы Subpage"
 <strong>Базы данных и язык SQL</strong><br><br>
 
 <span class="lesson-title">«Введение в базы данных»</span><br>
-① 📊 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA">Лекция (24.09.2025) </a></strong><br><br>
+① 📊 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA">Лекция (25.09.2025) </a></strong><br><br>
 
 </div>
