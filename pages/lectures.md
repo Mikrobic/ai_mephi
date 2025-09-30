@@ -26,7 +26,7 @@ description: "Описание страницы Subpage"
 
 ⑤ 📐 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%205">Лекция  (22.09.2025)  </a></strong><br>
 
-⑥ 📈 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%206">Семинар  (26.09.2025)  </a></strong><br><br>
+⑥ 🎯 <strong><a href="https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%206">Семинар  (26.09.2025)  </a></strong><br><br>
 
 
 
