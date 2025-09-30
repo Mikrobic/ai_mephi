@@ -44,8 +44,6 @@ jobs:
             📚 Новая лекция загружена!
             
             📦 Репозиторий: ${{ github.repository }}
-          # 🌿 Ветка: ${{ github.ref }}
-          # 👤 Автор: ${{ github.actor }}
             💬 Коммит: ${{ github.event.head_commit.message }}
             🔗 Ссылка: https://mikrobic.github.io/ai_mephi/lectures/
             
