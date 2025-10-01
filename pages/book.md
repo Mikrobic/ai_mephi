@@ -13,4 +13,6 @@ permalink: /book/
 
 ➕ <strong><a href="{{ site.baseurl }}/public/books/data_science.pdf">Математика для data science</a></strong><br><br>
 
+🐍 <strong><a href="{{ site.baseurl }}/public/books/learn_pyhon.pdf">Изучаем python Марк Лутц</a></strong><br><br>
+
 </div>
