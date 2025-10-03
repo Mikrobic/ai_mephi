@@ -62,6 +62,9 @@ description: "Описание страницы Subpage"
 <span class="lesson-title">«Функциональное программирование в python»</span><br>
 ⑨ 📈 <strong><a href="https://disk.yandex.ru/d/PhQviCwIix8eMg">Лекция (30.09.2025)  </a></strong><br><br>
 
+<span class="lesson-title">«Декораторы»</span><br>
+①⓪ 📈 <strong><a href="https://disk.yandex.ru/d/YWn-3mGqwYM6ww">Лекция (02.10.2025)  </a></strong><br><br>
+
 <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
 
 <strong>Базы данных и язык SQL</strong><br><br>
