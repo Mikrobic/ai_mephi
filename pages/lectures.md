@@ -77,9 +77,14 @@ description: "Описание страницы Subpage"
 <strong>Базы данных и язык SQL</strong><br><br>
 
 <span class="lesson-title">«Введение в базы данных»</span><br>
-① 🎯 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA">Лекция (25.09.2025) </a></strong><br>
+① 🎯 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%201.%20Вводное">Лекция (25.09.2025) </a></strong><br>
 
-② 📈 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA/GMT20251003-150132_Recording_1920x1040.mp4">Семинар (03.10.2025) </a></strong><br><br>
+② 📈 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%202.%20Создание%20таблиц%20на%20основе%20реальной%20предметной%20области">Семинар (03.10.2025) </a></strong><br><br>
+
+<span class="lesson-title">«DML-компонента языка SQL»</span><br>
+③ 🎯 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%203.%20DML-компонента%20языка%20SQL%20построение%20простых%20запросов">Лекция (07.10.2025)  </a></strong><br>
+
+④ 🔢 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%204.%20DML-компонента%20языка%20SQL%3A%20построение%20запросов%20с%20использованием%20группировки%20и%20многострочных%20функций">Семинар (08.10.2025)  </a></strong><br><br>
 
 
 </div>
