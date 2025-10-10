@@ -65,6 +65,13 @@ description: "Описание страницы Subpage"
 <span class="lesson-title">«Декораторы»</span><br>
 ①⓪ 📈 <strong><a href="https://disk.yandex.ru/d/YWn-3mGqwYM6ww">Лекция (02.10.2025)  </a></strong><br><br>
 
+<span class="lesson-title">«ООП 1»</span><br>
+①① 📐 <strong><a href="https://disk.yandex.ru/d/ckBq14w2Zo3kvg/Занятие%207">Лекция (06.10.2025)  </a></strong><br><br>
+
+<span class="lesson-title">«ООП 2»</span><br>
+①② 🎯 <strong><a href="https://disk.yandex.ru/d/QamXavMvDDw6uw">Лекция (08.09.2025)  </a></strong><br><br>
+
+
 <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
 
 <strong>Базы данных и язык SQL</strong><br><br>
