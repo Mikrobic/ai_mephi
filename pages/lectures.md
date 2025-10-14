@@ -69,7 +69,10 @@ description: "Описание страницы Subpage"
 ①① 📐 <strong><a href="https://disk.yandex.ru/d/ckBq14w2Zo3kvg/Занятие%207">Лекция (06.10.2025)  </a></strong><br><br>
 
 <span class="lesson-title">«ООП 2»</span><br>
-①② 🎯 <strong><a href="https://disk.yandex.ru/d/QamXavMvDDw6uw">Лекция (08.09.2025)  </a></strong><br><br>
+①② 🎯 <strong><a href="https://disk.yandex.ru/d/ckBq14w2Zo3kvg/Занятие%208">Лекция (08.10.2025)  </a></strong><br><br>
+
+<span class="lesson-title">«Модули и файлы»</span><br>
+①③ 🧮 <strong><a href="https://disk.yandex.ru/d/ckBq14w2Zo3kvg/Занятие%209">Лекция (13.10.2025)  </a></strong><br><br>
 
 
 <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
