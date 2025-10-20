@@ -101,5 +101,10 @@ description: "Описание страницы Subpage"
 ① 🎯 <strong><a href="https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%201.%20Введение%20в%20математическую%20статистику">Лекция (14.10.2025) </a></strong><br>
 
 
+<hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
+
+<strong>Предпоготовка и анализ данных</strong><br><br>
+
+① 🎯 <strong><a href="https://disk.yandex.ru/d/xALMHYDiVajsXQ">Лекция (1-2) (16.10.2025) </a></strong><br>
 
 </div>
