@@ -105,9 +105,13 @@ description: "Описание страницы Subpage"
 
 <strong>Специальные разделы математической статистики</strong><br><br>
 
+<span class="lesson-title">«Введение в математическую статистику»</span><br>
 ① 🎯 <strong><a href="https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%201.%20Введение%20в%20математическую%20статистику">Лекция (14.10.2025) </a></strong><br>
 
-② 📈 <strong><a href="https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%202.%20Терминология%20вероятностных%20распределений">Практика (18.10.2025) </a></strong><br>
+② 📈 <strong><a href="https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%202.%20Терминология%20вероятностных%20распределений">Практика (18.10.2025) </a></strong><br><br>
+
+<span class="lesson-title">«Основные понятия математической статистики»</span><br>
+③ 🎯 <strong><a href="https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%203.%20Основные%20понятия%20математической%20статистики">Лекция (21.10.2025) </a></strong><br>
 
 
 <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
