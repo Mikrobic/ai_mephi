@@ -96,6 +96,9 @@ description: "Описание страницы Subpage"
 ⑦ 🔢 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%207.%20DML-компонента%20языка%20SQL%3A%20построение%20рекурсивных%20запросов">Лекция (21.10.2025)  </a></strong><br>
 
 
+⑧ 🧮 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%208.%20Индексные%20структуры%20и%20анализ%20эффективности%20выполнения%20запросов">Лекция (22.10.2025)  </a></strong><br>
+
+
 <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
 
 <strong>Специальные разделы математической статистики</strong><br><br>
