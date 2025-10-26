@@ -93,6 +93,8 @@ description: "Описание страницы Subpage"
 
 ⑥ 📐 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%206.%20DML-компонента%20языка%20SQL%3A%20построение%20запросов%2C%20модифицирующих%20данные%20в%20таблицах">Лекция (15.10.2025)  </a></strong><br><br>
 
+⑦ 🔢 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%207.%20DML-компонента%20языка%20SQL%3A%20построение%20рекурсивных%20запросов">Лекция (21.10.2025)  </a></strong><br>
+
 
 <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
 
