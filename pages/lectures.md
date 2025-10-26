@@ -111,7 +111,10 @@ description: "Описание страницы Subpage"
 ② 📈 <strong><a href="https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%202.%20Терминология%20вероятностных%20распределений">Практика (18.10.2025) </a></strong><br><br>
 
 <span class="lesson-title">«Основные понятия математической статистики»</span><br>
-③ 🎯 <strong><a href="https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%203.%20Основные%20понятия%20математической%20статистики">Лекция (21.10.2025) </a></strong><br>
+③ 🎯 <strong><a href="https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%203.%20Основные%20понятия%20математической%20статистики">Лекция (21.10.2025) </a></strong><br><br>
+
+<span class="lesson-title">«Доверительные интервалы»</span><br>
+④ 🎯 <strong><a href="https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%204.%20Доверительные%20интервалы">Практика (25.10.2025) </a></strong><br>
 
 
 <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
