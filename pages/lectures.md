@@ -100,6 +100,9 @@ description: "Описание страницы Subpage"
 <span class="lesson-title">«Анализ эффективности выполнения запросов»</span><br>
 ⑧ 🧮 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%208.%20Индексные%20структуры%20и%20анализ%20эффективности%20выполнения%20запросов">Лекция (22.10.2025)  </a></strong><br><br>
 
+<span class="lesson-title">«Анализ эффективности выполнения запросов»</span><br>
+⑨ 🧮 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%209.%20Основы%20Pl%20..%20SQL">Лекция (29.10.2025)  </a></strong><br><br>
+
 
 <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
 
