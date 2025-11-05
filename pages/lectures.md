@@ -100,7 +100,7 @@ description: "Описание страницы Subpage"
 <span class="lesson-title">«Анализ эффективности выполнения запросов»</span><br>
 ⑧ 🧮 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%208.%20Индексные%20структуры%20и%20анализ%20эффективности%20выполнения%20запросов">Лекция (22.10.2025)  </a></strong><br><br>
 
-<span class="lesson-title">«Анализ эффективности выполнения запросов»</span><br>
+<span class="lesson-title">«Основы PL»</span><br>
 ⑨ 🧮 <strong><a href="https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%209.%20Основы%20Pl%20..%20SQL">Лекция (29.10.2025)  </a></strong><br><br>
 
 
@@ -118,6 +118,12 @@ description: "Описание страницы Subpage"
 
 <span class="lesson-title">«Доверительные интервалы»</span><br>
 ④ 🎯 <strong><a href="https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%204.%20Доверительные%20интервалы">Практика (25.10.2025) </a></strong><br>
+
+<span class="lesson-title">«Проверка гипотез»</span><br>
+⑤ 🎯 <strong><a href="https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%205.%20Проверка%20гипотез">Лекция (29.10.2025) </a></strong><br><br>
+
+<span class="lesson-title">«Практика Проверка гипотез»</span><br>
+⑥ 📐 <strong><a href="https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%206.%20Практика%20по%20проверке%20гипотез">Лекция (01.11.2025) </a></strong><br><br>
 
 
 <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
