@@ -128,7 +128,7 @@ description: "Описание страницы Subpage"
 <span class="lesson-title">«Практика»</span><br>
 ⑦ 📐 <strong><a href="https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%207.%20Практика">Лекция (08.11.2025) </a></strong><br><br>
 
---
+
 <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
 
 <strong>Предпоготовка и анализ данных</strong><br><br>
