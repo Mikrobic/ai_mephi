@@ -142,6 +142,15 @@ description: "Описание страницы Subpage"
 ④ 📈 <strong><a href="https://disk.yandex.ru/d/OmlexqoVSR6mwg/Вебинары%209-10">Лекция (9-10) (13.11.2025) </a></strong><br>
 
 
+<hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
+
+<strong>Машинное обучение</strong><br><br>
+
+① 🎯 <strong><a href="https://disk.yandex.ru/d/HVQQ-1q6hS2Fog/Занятие%201">Лекция (1-2) (14.11.2025) </a></strong><br>
+
+② 📈 <strong><a href="https://disk.yandex.ru/d/HVQQ-1q6hS2Fog/Занятие%202">Лекция (2-4) (21.11.2025) </a></strong><br>
+
+
 </div>
 
 
