@@ -139,6 +139,8 @@ description: "Описание страницы Subpage"
 
 ③ 📈 <strong><a href="https://disk.yandex.ru/d/8GEhMfmhOW7VuQ">Лекция (7-8) (06.11.2025) </a></strong><br>
 
+④ 📈 <strong><a href="https://disk.yandex.ru/d/OmlexqoVSR6mwg/Вебинары%209-10">Лекция (9-10) (13.11.2025) </a></strong><br>
+
 
 </div>
 
