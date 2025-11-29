@@ -139,7 +139,7 @@ description: "Описание страницы Subpage"
 
 ③ 📈 <strong><a href="https://disk.yandex.ru/d/8GEhMfmhOW7VuQ">Лекция (7-8) (06.11.2025) </a></strong><br>
 
-④ 📈 <strong><a href="https://disk.yandex.ru/d/OmlexqoVSR6mwg/Вебинары%209-10">Лекция (9-10) (13.11.2025) </a></strong><br>
+④ 📈 <strong><a href="https://disk.yandex.ru/d/OmlexqoVSR6mwg/Вебинары%209-10">Лекция (9-10) (13.11.2025) </a></strong><br><br>
 
 
 <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
@@ -148,7 +148,18 @@ description: "Описание страницы Subpage"
 
 ① 🎯 <strong><a href="https://disk.yandex.ru/d/HVQQ-1q6hS2Fog/Занятие%201">Лекция (1-2) (14.11.2025) </a></strong><br>
 
-② 📈 <strong><a href="https://disk.yandex.ru/d/HVQQ-1q6hS2Fog/Занятие%202">Лекция (2-4) (21.11.2025) </a></strong><br>
+② 📈 <strong><a href="https://disk.yandex.ru/d/HVQQ-1q6hS2Fog/Занятие%202">Лекция (2-4) (21.11.2025) </a></strong><br><br>
+
+
+<hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
+
+<strong>A/B тестирование</strong><br><br>
+
+① 📈 <strong><a href="https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%201.%2024.11.25">Лекция 1 (24.11.2025) </a></strong><br>
+
+② 📈 <strong><a href="https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%202.%2025.11.25">Лекция 2 (25.11.2025) </a></strong><br>
+
+③ 📈 <strong><a href="https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%203.%2026.11.25">Лекция 3 (26.11.2025) </a></strong><br>
 
 
 </div>
