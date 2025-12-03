@@ -243,7 +243,7 @@
 
 - section: "Предпоготовка и анализ данных"
   topics:
-    - title: ""
+    - title: "Список занятий"
       lectures:
         - type: "Лекция (1-2)"
           date: "16.10.2025"
@@ -268,7 +268,7 @@
 
 - section: "Машинное обучение"
   topics:
-    - title: ""
+    - title: "Список занятий"
       lectures:
         - type: "Лекция (1-2)"
           date: "14.11.2025"
@@ -283,7 +283,7 @@
 
 - section: "A/B тестирование"
   topics:
-    - title: ""
+    - title: "Список занятий"
       lectures:
         - type: "Лекция 1"
           date: "24.11.2025"
