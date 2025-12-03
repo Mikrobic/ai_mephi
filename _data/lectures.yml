@@ -1,24 +1,132 @@
-- section: "ТЕСТ: Специальные разделы теории вероятностей"
+- section: "Специальные разделы теории вероятностей"
   topics:
-    - title: "Тестовая тема 1"
+    - title: "Множества, логика, элементы статистики и комбинаторики"
       lectures:
         - type: "Лекция"
           date: "08.09.2025"
-          link: "https://example.com/test1"
+          link: "https://disk.yandex.ru/d/GztepiWiSsZDTQ"
           emoji: "📊"
           number: 1
         - type: "Семинар"
           date: "12.09.2025"
-          link: "https://example.com/test2"
+          link: "https://disk.yandex.ru/d/VoGwTcjon12dWg"
           emoji: "📈"
           number: 2
+    - title: "Основы теории вероятностей"
+      lectures:
+        - type: "Лекция"
+          date: "15.09.2025"
+          link: "https://disk.yandex.ru/d/HSzUHScWr8P6tg"
+          emoji: "🎯"
+          number: 3
+        - type: "Семинар"
+          date: "19.09.2025"
+          link: "https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%204"
+          emoji: "🔢"
+          number: 4
+    - title: "Графы"
+      lectures:
+        - type: "Лекция"
+          date: "22.09.2025"
+          link: "https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%205"
+          emoji: "📐"
+          number: 5
+        - type: "Семинар"
+          date: "26.09.2025"
+          link: "https://disk.yandex.ru/d/asSTsSuliVXZew/Занятие%206"
+          emoji: "📊"
+          number: 6
 
-- section: "ТЕСТ: Программирование на python"
+- section: "Программирование на python"
   topics:
-    - title: "Тестовая тема Python"
+    - title: "Система контроля версий Git"
       lectures:
         - type: "Лекция"
           date: "04.09.2025"
-          link: "https://example.com/python1"
-          emoji: "🐍"
+          link: "https://disk.yandex.ru/d/5tPfPHnO5Y7OBA"
+          emoji: "📊"
+          number: 1
+    - title: "Введение в Python"
+      lectures:
+        - type: "Лекция"
+          date: "06.09.2025"
+          link: "https://disk.yandex.ru/d/jOGOC36Z7qXC2g"
+          emoji: "📈"
+          number: 2
+    - title: "Управляющие конструкции: условные операторы"
+      lectures:
+        - type: "Лекция"
+          date: "09.09.2025"
+          link: "https://disk.yandex.ru/d/QamXavMvDDw6uw"
+          emoji: "🎯"
           number: 3
+    - title: "Управляющие конструкции: циклы и ветвления"
+      lectures:
+        - type: "Лекция"
+          date: "11.09.2025"
+          link: "https://disk.yandex.ru/d/UgY3VgRyJINFtg"
+          emoji: "🔢"
+          number: 4
+    - title: "Типы данных:строки, списки и кортежи"
+      lectures:
+        - type: "Лекция"
+          date: "16.09.2025"
+          link: "https://disk.yandex.ru/d/bq9mGcMPbkfVqw"
+          emoji: "📐"
+          number: 5
+    - title: "Коллекции данных: словари и множества"
+      lectures:
+        - type: "Лекция"
+          date: "17.09.2025"
+          link: "https://disk.yandex.ru/d/sRB6AqKz5Z_xMA"
+          emoji: "🧮"
+          number: 6
+    - title: "Функции как полноправные объекты"
+      lectures:
+        - type: "Лекция"
+          date: "23.09.2025"
+          link: "https://disk.yandex.ru/d/_8nhbSLPvxAeRw"
+          emoji: "📈"
+          number: 7
+    - title: "Функции как полноправные объекты 2"
+      lectures:
+        - type: "Лекция"
+          date: "24.09.2025"
+          link: "https://disk.yandex.ru/d/B5kQ9LLERZ028Q"
+          emoji: "🧮"
+          number: 8
+    - title: "Функциональное программирование в python"
+      lectures:
+        - type: "Лекция"
+          date: "30.09.2025"
+          link: "https://disk.yandex.ru/d/PhQviCwIix8eMg"
+          emoji: "📈"
+          number: 9
+    - title: "Декораторы"
+      lectures:
+        - type: "Лекция"
+          date: "02.10.2025"
+          link: "https://disk.yandex.ru/d/YWn-3mGqwYM6ww"
+          emoji: "📈"
+          number: 10
+    - title: "ООП 1"
+      lectures:
+        - type: "Лекция"
+          date: "06.10.2025"
+          link: "https://disk.yandex.ru/d/ckBq14w2Zo3kvg/Занятие%207"
+          emoji: "📐"
+          number: 11
+    - title: "ООП 2"
+      lectures:
+        - type: "Лекция"
+          date: "08.10.2025"
+          link: "https://disk.yandex.ru/d/ckBq14w2Zo3kvg/Занятие%208"
+          emoji: "🎯"
+          number: 12
+    - title: "Модули и файлы"
+      lectures:
+        - type: "Лекция"
+          date: "13.10.2025"
+          link: "https://disk.yandex.ru/d/ckBq14w2Zo3kvg/Занятие%209"
+          emoji: "🧮"
+          number: 13
