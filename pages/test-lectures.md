@@ -7,38 +7,45 @@ description: "Тест автоматизации лекций"
 
 <div style="text-align: center;">
 
-<h2>Это тестовая страница</h2>
-<p>Если все работает, вы увидите данные ниже:</p>
-<hr>
-
 {% if site.data.lectures %}
-  <p style="color: green;">✅ Данные найдены в site.data.lectures</p>
+  {% comment %} Функция для преобразования цифр в кружочки {% endcomment %}
+  {% assign circles = "①②③④⑤⑥⑦⑧⑨" %}
   
   {% for section in site.data.lectures %}
-  <h3>{{ section.section }}</h3>
-  
+  <strong>{{ section.section }}</strong><br><br>
+
   {% for topic in section.topics %}
-  <p><strong>Тема:</strong> {{ topic.title }}</p>
-  
+  <span class="lesson-title">«{{ topic.title }}»</span><br>
+
   {% for lecture in topic.lectures %}
-  <div style="margin-left: 20px;">
-    • {{ lecture.emoji }} 
-    <a href="{{ lecture.link }}">{{ lecture.type }}</a> 
-    ({{ lecture.date }})
-  </div>
+  {% comment %} Преобразуем номер в кружочек {% endcomment %}
+  {% if lecture.number %}
+    {% assign num = lecture.number %}
+    {% if num == 10 %}①⓪
+    {% elsif num == 11 %}①①
+    {% elsif num == 12 %}①②
+    {% elsif num == 13 %}①③
+    {% else %}
+      {{ circles | slice: num | minus: 1 }}
+    {% endif %}
+  {% endif %}
+  {{ lecture.emoji }} <strong><a href="{{ lecture.link }}">{{ lecture.type }} ({{ lecture.date }})</a></strong><br>
+  {% endfor %}<br>
   {% endfor %}
-  <br>
-  {% endfor %}
-  
-  <hr>
+
+  {% unless forloop.last %}
+  <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ccc;"><br>
+  {% endunless %}
+
   {% endfor %}
   
 {% else %}
-  <p style="color: red;">❌ Данные НЕ найдены в site.data.lectures</p>
+  <h2>Данные не найдены!</h2>
+  <p style="color: red;">❌ Файл _data/lectures.yml не найден или пуст</p>
   <p>Проверьте:</p>
-  <ul>
-    <li>Существует ли папка _data?</li>
-    <li>Есть ли файл _data/lectures.yml?</li>
+  <ul style="text-align: left; display: inline-block;">
+    <li>Существует ли папка <code>_data</code>?</li>
+    <li>Есть ли файл <code>_data/lectures.yml</code>?</li>
     <li>Правильный ли синтаксис YAML?</li>
   </ul>
 {% endif %}
