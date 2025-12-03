@@ -130,3 +130,173 @@
           link: "https://disk.yandex.ru/d/ckBq14w2Zo3kvg/Занятие%209"
           emoji: "🧮"
           number: 13
+
+- section: "Базы данных и язык SQL"
+  topics:
+    - title: "Введение в базы данных"
+      lectures:
+        - type: "Лекция"
+          date: "25.09.2025"
+          link: "https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%201.%20Вводное"
+          emoji: "🎯"
+          number: 1
+        - type: "Семинар"
+          date: "03.10.2025"
+          link: "https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%202.%20Создание%20таблиц%20на%20основе%20реальной%20предметной%20области"
+          emoji: "📈"
+          number: 2
+    - title: "DML-компонента языка SQL"
+      lectures:
+        - type: "Лекция"
+          date: "07.10.2025"
+          link: "https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%203.%20DML-компонента%20языка%20SQL%20построение%20простых%20запросов"
+          emoji: "🎯"
+          number: 3
+        - type: "Семинар"
+          date: "08.10.2025"
+          link: "https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%204.%20DML-компонента%20языка%20SQL%3A%20построение%20запросов%20с%20использованием%20группировки%20и%20многострочных%20функций"
+          emoji: "🔢"
+          number: 4
+        - type: "Лекция"
+          date: "13.10.2025"
+          link: "https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%205.%20DML-компонента%20языка%20SQL%3A%20построение%20запросов%20к%20нескольким%20таблицам"
+          emoji: "📐"
+          number: 5
+    - title: "Построение запросов модифицирющих данных"
+      lectures:
+        - type: "Лекция"
+          date: "15.10.2025"
+          link: "https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%206.%20DML-компонента%20языка%20SQL%3A%20построение%20запросов%2C%20модифицирующих%20данные%20в%20таблицах"
+          emoji: "📐"
+          number: 6
+    - title: "Построение рекурсивных запросов"
+      lectures:
+        - type: "Лекция"
+          date: "21.10.2025"
+          link: "https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%207.%20DML-компонента%20языка%20SQL%3A%20построение%20рекурсивных%20запросов"
+          emoji: "🔢"
+          number: 7
+    - title: "Анализ эффективности выполнения запросов"
+      lectures:
+        - type: "Лекция"
+          date: "22.10.2025"
+          link: "https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%208.%20Индексные%20структуры%20и%20анализ%20эффективности%20выполнения%20запросов"
+          emoji: "🧮"
+          number: 8
+    - title: "Основы PL"
+      lectures:
+        - type: "Лекция"
+          date: "29.10.2025"
+          link: "https://disk.yandex.ru/d/Di0qh6cAj4cmRA/Занятие%209.%20Основы%20Pl%20..%20SQL"
+          emoji: "🧮"
+          number: 9
+
+- section: "Специальные разделы математической статистики"
+  topics:
+    - title: "Введение в математическую статистику"
+      lectures:
+        - type: "Лекция"
+          date: "14.10.2025"
+          link: "https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%201.%20Введение%20в%20математическую%20статистику"
+          emoji: "🎯"
+          number: 1
+        - type: "Практика"
+          date: "18.10.2025"
+          link: "https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%202.%20Терминология%20вероятностных%20распределений"
+          emoji: "📈"
+          number: 2
+    - title: "Основные понятия математической статистики"
+      lectures:
+        - type: "Лекция"
+          date: "21.10.2025"
+          link: "https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%203.%20Основные%20понятия%20математической%20статистики"
+          emoji: "🎯"
+          number: 3
+    - title: "Доверительные интервалы"
+      lectures:
+        - type: "Практика"
+          date: "25.10.2025"
+          link: "https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%204.%20Доверительные%20интервалы"
+          emoji: "🎯"
+          number: 4
+    - title: "Проверка гипотез"
+      lectures:
+        - type: "Лекция"
+          date: "29.10.2025"
+          link: "https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%205.%20Проверка%20гипотез"
+          emoji: "🎯"
+          number: 5
+    - title: "Практика Проверка гипотез"
+      lectures:
+        - type: "Лекция"
+          date: "01.11.2025"
+          link: "https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%206.%20Практика%20по%20проверке%20гипотез"
+          emoji: "📐"
+          number: 6
+    - title: "Практика"
+      lectures:
+        - type: "Лекция"
+          date: "08.11.2025"
+          link: "https://disk.yandex.ru/d/6p-RT9Jni1R2rg/Занятие%207.%20Практика"
+          emoji: "📐"
+          number: 7
+
+- section: "Предпоготовка и анализ данных"
+  topics:
+    - title: ""
+      lectures:
+        - type: "Лекция (1-2)"
+          date: "16.10.2025"
+          link: "https://disk.yandex.ru/d/xALMHYDiVajsXQ"
+          emoji: "🎯"
+          number: 1
+        - type: "Лекция (3-4)"
+          date: "23.10.2025"
+          link: "https://disk.yandex.ru/d/OmlexqoVSR6mwg/Вебинары_3-4"
+          emoji: "📈"
+          number: 2
+        - type: "Лекция (7-8)"
+          date: "06.11.2025"
+          link: "https://disk.yandex.ru/d/8GEhMfmhOW7VuQ"
+          emoji: "📈"
+          number: 3
+        - type: "Лекция (9-10)"
+          date: "13.11.2025"
+          link: "https://disk.yandex.ru/d/OmlexqoVSR6mwg/Вебинары%209-10"
+          emoji: "📈"
+          number: 4
+
+- section: "Машинное обучение"
+  topics:
+    - title: ""
+      lectures:
+        - type: "Лекция (1-2)"
+          date: "14.11.2025"
+          link: "https://disk.yandex.ru/d/HVQQ-1q6hS2Fog/Занятие%201"
+          emoji: "🎯"
+          number: 1
+        - type: "Лекция (2-4)"
+          date: "21.11.2025"
+          link: "https://disk.yandex.ru/d/HVQQ-1q6hS2Fog/Занятие%202"
+          emoji: "📈"
+          number: 2
+
+- section: "A/B тестирование"
+  topics:
+    - title: ""
+      lectures:
+        - type: "Лекция 1"
+          date: "24.11.2025"
+          link: "https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%201.%2024.11.25"
+          emoji: "📈"
+          number: 1
+        - type: "Лекция 2"
+          date: "25.11.2025"
+          link: "https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%202.%2025.11.25"
+          emoji: "📈"
+          number: 2
+        - type: "Лекция 3"
+          date: "26.11.2025"
+          link: "https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%203.%2026.11.25"
+          emoji: "📈"
+          number: 3
