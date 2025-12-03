@@ -1,0 +1,24 @@
+- section: "ТЕСТ: Специальные разделы теории вероятностей"
+  topics:
+    - title: "Тестовая тема 1"
+      lectures:
+        - type: "Лекция"
+          date: "08.09.2025"
+          link: "https://example.com/test1"
+          emoji: "📊"
+          number: 1
+        - type: "Семинар"
+          date: "12.09.2025"
+          link: "https://example.com/test2"
+          emoji: "📈"
+          number: 2
+
+- section: "ТЕСТ: Программирование на python"
+  topics:
+    - title: "Тестовая тема Python"
+      lectures:
+        - type: "Лекция"
+          date: "04.09.2025"
+          link: "https://example.com/python1"
+          emoji: "🐍"
+          number: 3
