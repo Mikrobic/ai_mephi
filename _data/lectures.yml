@@ -280,6 +280,11 @@
           link: "https://disk.yandex.ru/d/HVQQ-1q6hS2Fog/Занятие%202"
           emoji: "📈"
           number: 2
+        - type: "Лекция (4-6)"
+          date: "29.11.2025"
+          link: "https://disk.yandex.ru/d/HVQQ-1q6hS2Fog/Занятие%203"
+          emoji: "📈"
+          number: 3
 
 - section: "A/B тестирование"
   topics:
