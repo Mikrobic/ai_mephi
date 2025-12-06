@@ -4,7 +4,7 @@
       lectures:
         - type: ""
           date: "Машиное обучение с учителем"
-          link: "https://github.com/Mikrobic/educational_material/tree/main/machine_learning"
+          link: "https://github.com/Mikrobic/educational_material/tree/main/машинное_обучение"
           emoji: "📊"
           number: 1
     - title: "Материалы"
