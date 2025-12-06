@@ -1,23 +1,23 @@
 - section: "Ноутбуки"
   topics:
-    - title: "Машиное обучение с учителем"
+    - title: "Материалы"
       lectures:
         - type: ""
-          date: "2025/1_семестр"
+          date: "Машиное обучение с учителем"
           link: "https://github.com/Mikrobic/educational_material/tree/main/machine_learning"
           emoji: "📊"
           number: 1
-    - title: "Предобработка и анализ данных"
+    - title: "Материалы"
       lectures:
         - type: ""
-          date: "2025/1_семестр"
+          date: "Предобработка и анализ данных"
           link: "https://github.com/Mikrobic/educational_material/tree/main/предобработка_и_анализ_данных"
           emoji: "🎯"
           number: 2
-    - title: "Специальные разделы математической статистики"
+    - title: "Материалы"
       lectures:
         - type: ""
-          date: "2025/1_семестр"
+          date: "Специальные разделы математической статистики"
           link: "https://github.com/Mikrobic/educational_material/tree/main/специальные_разделы_математической_статистики"
           emoji: "📐"
           number: 3
