@@ -372,15 +372,15 @@
                   link: "https://disk.yandex.ru/d/iqrPOUyu1bh4bQ/2025-12-04%20Секреты%20визуализации"
                   emoji: "📈"
                   number: 1
-              lectures:
-                - title: "Практика Проверка гипотез"
+            - title: "Практика Проверка гипотез"
+              lectures:    
                 - type: "Лекция 2"
                   date: "11.12.2025"
                   link: "https://disk.yandex.ru/d/iqrPOUyu1bh4bQ/2025-12-11%20Сложные%20формулы%20DataLens%2C%20визуализация%20в%20python"
                   emoji: "📈"
                   number: 2
+            - title: "Карты"
                 lectures:
-                - title: "Карты"
                 - type: "Лекция 3"
                   date: "18.12.2025"
                   link: "https://disk.yandex.ru/d/iqrPOUyu1bh4bQ/2025-12-18%20Карты"
