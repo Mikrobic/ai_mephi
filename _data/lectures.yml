@@ -310,3 +310,48 @@
           link: "https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%203.%2026.11.25"
           emoji: "📈"
           number: 3
+        - type: "Лекция 4"
+          date: "01.12.2025"
+          link: "https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%204.%2001.12.25"
+          emoji: "📈"
+          number: 4
+        - type: "Лекция 5"
+          date: "02.12.2025"
+          link: "https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%205.%2002.12.25"
+          emoji: "📈"
+          number: 5
+        - type: "Лекция 6"
+          date: "03.12.2025"
+          link: "https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%206.%2003.12.25"
+          emoji: "📈"
+          number: 6
+        - type: "Лекция 7"
+          date: "08.12.2025"
+          link: "https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%207.%2008.12.25"
+          emoji: "📈"
+          number: 7
+        - type: "Лекция 8"
+          date: "09.12.2025"
+          link: "https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%208.%2009.12.25"
+          emoji: "📈"
+          number: 8
+        - type: "Лекция 9"
+          date: "10.12.2025"
+          link: "https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%209.%2010.12.25"
+          emoji: "📈"
+          number: 9
+        - type: "Лекция 10"
+          date: "15.12.2025"
+          link: "https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%2010.%2015.12.25"
+          emoji: "📈"
+          number: 10
+        - type: "Лекция 11"
+          date: "16.12.2025"
+          link: "https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%2011.%2016.12.25"
+          emoji: "📈"
+          number: 11
+        - type: "Лекция 12"
+          date: "17.12.2025"
+          link: "https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%2012.%2017.12.25"
+          emoji: "📈"
+          number: 12
