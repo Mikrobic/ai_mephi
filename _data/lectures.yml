@@ -360,3 +360,29 @@
           link: "https://disk.yandex.ru/d/6R-FTCQyF98erw/Занятие%2012.%2017.12.25"
           emoji: "📈"
           number: 12
+
+
+ - section: "BI и методы визуализации данных"
+          topics:
+            - title: "Список занятий"
+              lectures:
+                - title: "Секреты визуализации"
+                - type: "Лекция 1"
+                  date: "04.12.2025"
+                  link: "https://disk.yandex.ru/d/iqrPOUyu1bh4bQ/2025-12-04%20Секреты%20визуализации"
+                  emoji: "📈"
+                  number: 1
+              lectures:
+                - title: "Практика Проверка гипотез"
+                - type: "Лекция 2"
+                  date: "11.12.2025"
+                  link: "https://disk.yandex.ru/d/iqrPOUyu1bh4bQ/2025-12-11%20Сложные%20формулы%20DataLens%2C%20визуализация%20в%20python"
+                  emoji: "📈"
+                  number: 2
+                lectures:
+                - title: "Карты"
+                - type: "Лекция 3"
+                  date: "18.12.2025"
+                  link: "https://disk.yandex.ru/d/iqrPOUyu1bh4bQ/2025-12-18%20Карты"
+                  emoji: "📈"
+                  number: 3
