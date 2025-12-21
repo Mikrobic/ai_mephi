@@ -290,6 +290,11 @@
           link: "https://disk.yandex.ru/d/HVQQ-1q6hS2Fog/Занятие%204"
           emoji: "📈"
           number: 4
+        - type: "Лекция (9-10)"
+          date: "15.12.2025"
+          link: "https://disk.yandex.ru/d/HVQQ-1q6hS2Fog/Занятие%205"
+          emoji: "📈"
+          number: 5
 
 - section: "A/B тестирование"
   topics:
