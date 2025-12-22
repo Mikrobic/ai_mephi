@@ -15,9 +15,9 @@ permalink: /
 
 Группа в пачке: <a href="https://app.pachca.com/chats/28575726">Пачка</a>
 
-Московская тусовка : <a href="https://web.telegram.org/k/#-3092427775">Москва</a> 
+Московская тусовка : <a href="https://t.me/+ExzcJDKx6rAwYTZi">Москва</a> 
 
-Питерская тусовка : <a href="https://web.telegram.org/k/#-2894314927">Санкт-Петербург</a> 
+Питерская тусовка : <a href="https://t.me/+ExzcJDKx6rAwYTZi">Санкт-Петербург</a> 
 
 Обратная связь: <a href="https://web.telegram.org/k/#@SergeyTimakin">@SergeyTimakin</a> 
 
