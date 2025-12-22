@@ -15,7 +15,7 @@ permalink: /
 
 Группа в пачке: <a href="https://app.pachca.com/chats/28575726">Пачка</a>
 
-Московская тусовка : <a href="https://t.me/+ExzcJDKx6rAwYTZi">Москва</a> 
+Московская тусовка : <a href="https://t.me/+OcEpUqrj7Kk5YTli">Москва</a> 
 
 Питерская тусовка : <a href="https://t.me/+ExzcJDKx6rAwYTZi">Санкт-Петербург</a> 
 
