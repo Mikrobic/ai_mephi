@@ -42,7 +42,7 @@ jobs:
           -d '{
             "chat_id": "${{ secrets.TELEGRAM_SUPERGROUP_CHAT_ID }}",
             "message_thread_id": "${{ secrets.THREAD_ID }}",
-            "text": "📚 Новая лекция загружена!\n\n📦 Репозиторий: ${{ github.repository }}\n💬 Коммит: ${{ github.event.head_commit.message }}\n🔗 Ссылка: https://mikrobic.github.io/ai_mephi/lectures/\n\n#лекция #обновление",
+            "text": "📚 Новая лекция загружена!\n\n📦 Репозиторий: ${{ github.repository }}\n💬 Коммит: ${{ github.event.head_commit.message }}\n🔗 Ссылка: https://mikrobic.github.io/ai_mephi/lectures_second/\n\n#лекция #обновление",
             "parse_mode": "HTML"
           }'
 
