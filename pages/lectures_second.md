@@ -13,7 +13,7 @@ description: "Тест автоматизации лекций"
   {% for topic in section.topics %}
   <span class="lesson-title">«{{ topic.title }}»</span><br>
 
-  {% for lecture in topic.lectures_second %}
+  {% for lecture in topic.lectures %}
   {% comment %} Нумерация кружочками {% endcomment %}
   {% if lecture.number == 10 %}①⓪
   {% elsif lecture.number == 11 %}①①
